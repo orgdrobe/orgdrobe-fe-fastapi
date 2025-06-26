@@ -31,7 +31,7 @@ After installing the python3-venv package, recreate your virtual environment.
 python3 -m venv .venv
 ```
 
-`env` - name on the virtual environment
+`.venv` - name on the virtual environment
 
 **How to activate and deactivate**
 

@@ -67,3 +67,24 @@ uvicorn main:app --port=8000 --reload
 `--port=8000` - use port 8000. 
 
 `--reload` - reload server on file update
+
+## DB Migrations
+
+**Alembic** with SQLAlchemy
+
+install 
+
+```bash
+# pip install alembic
+pip install -r requirements.txt # in my case
+```
+
+Initialize
+
+```bash
+alembic init alembic
+```
+
+Configure Alembic: Modify the alembic.ini
+
+---

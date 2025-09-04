@@ -55,6 +55,8 @@ pip freeze > requirements.txt
 
 ## Run
 
+### old
+
 ```bash
 uvicorn main:app --port=8000 --reload
 # uvicorn main:app --host 0.0.0.0 --port 8000 --reload # you can also open to a local network
@@ -65,3 +67,9 @@ uvicorn main:app --port=8000 --reload
 `--port=8000` - use port 8000. 
 
 `--reload` - reload server on file update
+
+### new
+
+```bash
+fastapi dev main.py
+```

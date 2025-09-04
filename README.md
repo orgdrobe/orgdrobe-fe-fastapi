@@ -14,45 +14,43 @@ Contact me or see what I'm up to - [maksstep.com](https://maksstep.com) or [link
 
 [OpenAPI and JSON Schema `http://127.0.0.1:8000/openapi.json`](http://127.0.0.1:8000/openapi.json)
 
-## Python and virtual environments on Debian 12
+## install
 
-**Install**
-
-On Debian/Ubuntu systems, you need to install the python3-venv package using the following command.
+### linux debian
 
 ```bash
-sudo apt install python3-venv
-```
-After installing the python3-venv package, recreate your virtual environment.
+python3 -m venv .venv-debian
+source .venv-debian/bin/activate
 
-**Create**
-
-```bash
-python3 -m venv .venv
-```
-
-`.venv` - name on the virtual environment
-
-**How to activate and deactivate**
-
-activate:
-
-```bash
-source .venv/bin/activate
-```
-
-*run python code at this stage* 
-
-deactivate (just by entering this):
-
-```bash
-deactivate
-```
-
-## Install requirements
-
-```bash
 pip install -r requirements.txt
+# or alternatively install from requirements.txt 
+
+# ...
+
+deactivate # when you are finished
+```
+
+### windows (cmd)
+
+```bash
+python -m venv .venv-win
+
+.venv-win\Scripts\activate
+
+pip install -r requirements_manual.txt
+# or alternatively install from requirements.txt 
+
+# ...
+
+deactivate # when you are finished
+```
+
+### note
+
+to update `requirements.txt`:
+
+```bash
+pip freeze > requirements.txt
 ```
 
 ## Run

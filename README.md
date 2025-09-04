@@ -73,3 +73,9 @@ uvicorn main:app --port=8000 --reload
 ```bash
 fastapi dev main.py
 ```
+
+## .env
+
+`.env.shared` - default values 
+
+`.env.secret` - your sensitive variables (that will override the default ones). you may create this file but don't commit it. use `.env.shared` as an example

@@ -63,6 +63,27 @@ async def read_item(item_id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Item not found")
 
+@app.put("/items/{item_id}")
+async def update_item(item_id: int, item_in: schemas.ItemBase, db: db_dependency):
+    try:
+        item = db.query(models.Item).filter(models.Item.id == item_id).one()
+        update_object_attributes(item_in, item)
+        db.commit()
+        db.refresh(item)
+        return item
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail=f"User {item_id} not found")
+
+@app.delete("/items/{item_id}")
+async def delete_item(item_id: int, db: db_dependency):
+    try:
+        user = db.query(models.Item).filter(models.Item.id == item_id).one()
+        db.delete(user)
+        db.commit()
+        return {"message": f"Item {item_id} deleted successfully"}
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
+
 @app.post("/users/")
 async def create_user(user_in: schemas.UserBase, db: db_dependency):
     user = models.User(**user_in.dict())

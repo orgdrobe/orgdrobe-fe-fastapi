@@ -40,7 +40,7 @@ def update_object_attributes(user_in, user): # TODO: move to a separate file?
 
 @app.get("/")
 async def root():
-    return {"message":"hello world", "openapi swagger":"http://127.0.0.1:8000/docs"}
+    return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
 @app.post("/items/")
 async def create_item(item_in: schemas.ItemBase, db: db_dependency):

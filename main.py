@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 # from my files
-from database import engine, SessionLocal 
+from database import engine, get_db
 import models
 import schemas
 
@@ -18,13 +18,6 @@ app = FastAPI(
 ) # Create the FastAPI instance
 
 models.Base.metadata.create_all(bind=engine) # Create the tables
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 

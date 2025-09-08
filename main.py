@@ -3,6 +3,12 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
+from typing import Annotated
+
+# from my files
+from database import engine, SessionLocal 
+import models
+import schemas
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -11,13 +17,8 @@ app = FastAPI(
     docs_url="/docs"
 ) # Create the FastAPI instance
 
-from database import engine, SessionLocal # from my files
-
-import models # from my files
 models.Base.metadata.create_all(bind=engine) # Create the tables
 
-
-# get db then close the connection
 def get_db():
     db = SessionLocal()
     try:
@@ -25,14 +26,9 @@ def get_db():
     finally:
         db.close()
 
-from typing import Annotated
-
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
-
 # FastAPI routes
-
-import schemas # from my files
 
 def update_object_attributes(user_in, user): # TODO: move to a separate file?
     for attr, value in user_in.dict().items():

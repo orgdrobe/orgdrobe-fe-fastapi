@@ -1,7 +1,7 @@
 from pydantic import BaseModel, constr
 from typing import List, Optional, Union
 
-# base models
+# Pydantic Models (Data Validation & Serialization) (for API clients)
 
 class UserBase(BaseModel):
     user: constr(min_length=1)

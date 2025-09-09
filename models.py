@@ -2,7 +2,8 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 
 from database import Base
 
-# database models
+# SQLAlchemy Models (Database Tables)
+
 class User(Base):
     __tablename__ = "users"
 

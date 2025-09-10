@@ -73,15 +73,15 @@ async def delete_item(item_id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
 
-@app.post("/users/")
-async def create_user(user_in: schemas.UserBase, db: db_dependency):
+@app.post("/users", response_model=schemas.UserResponse)
+async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     user = models.User(**user_in.dict())
     db.add(user)
     db.commit()
     db.refresh(user)
     return user
 
-@app.get("/users")
+@app.get("/users", response_model=List[schemas.UserResponse])
 async def list_users(db: db_dependency):
     user_list = db.query(models.User).all()
     return user_list
@@ -90,7 +90,7 @@ async def list_users(db: db_dependency):
 # async def get_current_user():
 #     return {"Message": "this is the current user"}
 
-@app.get("/users/{user_id}")
+@app.get("/users/{user_id}", response_model=schemas.UserResponse)
 async def get_user(user_id: int, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == user_id).one()
@@ -98,7 +98,7 @@ async def get_user(user_id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
 
-@app.put("/users/{user_id}")
+@app.put("/users/{user_id}", response_model=schemas.UserResponse)
 async def update_user(user_id: int, user_in: schemas.UserBase, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == user_id).one()

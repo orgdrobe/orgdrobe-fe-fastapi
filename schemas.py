@@ -6,6 +6,14 @@ from typing import List, Optional, Union
 class UserBase(BaseModel):
     user: constr(min_length=1)
 
+class UserCreate(UserBase):
+    pass
+
+class UserResponse(UserBase):
+    id: int
+    class Config:
+        from_attributes = True 
+
 class ItemBase(BaseModel):
     name: constr(min_length=1)
     description: Optional[Union[constr(min_length=1), None]] = None

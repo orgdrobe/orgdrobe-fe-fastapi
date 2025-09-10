@@ -31,20 +31,20 @@ def update_object_attributes(user_in, user): # TODO: move to a separate file?
 async def root():
     return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
-@app.post("/items/")
-async def create_item(item_in: schemas.ItemBase, db: db_dependency):
+@app.post("/items/", response_model=schemas.ItemResponse)
+async def create_item(item_in: schemas.ItemCreate, db: db_dependency):
     item = models.Item(**item_in.dict())
     db.add(item)
     db.commit()
     db.refresh(item)
     return item
 
-@app.get("/items")
+@app.get("/items", response_model=List[schemas.ItemResponse])
 async def list_items(db: db_dependency):
     item_list = db.query(models.Item).all()
     return item_list
 
-@app.get("/items/{item_id}")
+@app.get("/items/{item_id}", response_model=schemas.ItemResponse)
 async def read_item(item_id: int, db: db_dependency):
     try:
         item = db.query(models.Item).filter(models.Item.id == item_id).one()
@@ -52,7 +52,7 @@ async def read_item(item_id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Item not found")
 
-@app.put("/items/{item_id}")
+@app.put("/items/{item_id}", response_model=schemas.ItemResponse)
 async def update_item(item_id: int, item_in: schemas.ItemBase, db: db_dependency):
     try:
         item = db.query(models.Item).filter(models.Item.id == item_id).one()

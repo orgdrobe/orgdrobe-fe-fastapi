@@ -18,3 +18,11 @@ class ItemBase(BaseModel):
     name: constr(min_length=1)
     description: Optional[Union[constr(min_length=1), None]] = None
     user_id: Optional[int] = None
+
+class ItemCreate(ItemBase):
+    pass
+
+class ItemResponse(ItemBase):
+    id: int
+    class Config:
+        from_attributes = True

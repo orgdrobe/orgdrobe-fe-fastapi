@@ -8,7 +8,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    user = Column(String, index=True)
+    login = Column(String, index=True)
 
 class Item(Base):
     __tablename__ = "items"

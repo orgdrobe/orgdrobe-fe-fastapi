@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 # Pydantic Models (Data Validation & Serialization) (for API clients)
 
 class UserBase(BaseModel):
-    user: constr(min_length=1)
+    login: constr(min_length=1)
 
 class UserCreate(UserBase):
     pass

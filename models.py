@@ -4,6 +4,8 @@ from database import Base
 
 # SQLAlchemy Models (Database Tables)
 
+# TODO add validation like in Pydantic Models (schemas.py) (a nullable field with minimum length: `name: str | None = Field(default=None,  min_length=1)`)??? nah, too much code
+
 class User(Base):
     __tablename__ = "users"
 

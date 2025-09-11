@@ -1,28 +1,39 @@
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, EmailStr, Field
 from typing import List, Optional, Union
+from datetime import datetime
 
 # Pydantic Models (Data Validation & Serialization) (for API clients)
 
 class UserBase(BaseModel):
-    login: constr(min_length=1)
+    login: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr = Field(...)
+    password: str = Field(..., min_length=8, max_length=100)
+    name: str | None = Field(default=None,  min_length=1)
+    picture: str | None = Field(default=None,  min_length=1) 
 
 class UserCreate(UserBase):
     pass
 
-class UserResponse(UserBase):
+class UserResponse(BaseModel):
     id: int
-    class Config:
-        from_attributes = True 
+    login: str = Field(..., min_length=1, max_length=100)
+    email: EmailStr = Field(...)
+    name: str | None # = Field(default=None,  min_length=1)
+    picture: str | None # = Field(default=None,  min_length=1) 
+    created_at: datetime
+    updated_at: datetime
 
 class ItemBase(BaseModel):
-    name: constr(min_length=1)
-    description: Optional[Union[constr(min_length=1), None]] = None
-    user_id: Optional[int] = None
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    user_id: int
 
 class ItemCreate(ItemBase):
     pass
 
 class ItemResponse(ItemBase):
     id: int
-    class Config:
-        from_attributes = True
+    created_at: datetime
+    updated_at: datetime
+    # class Config:
+    #     from_attributes = True

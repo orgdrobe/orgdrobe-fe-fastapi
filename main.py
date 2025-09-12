@@ -10,6 +10,7 @@ from database import engine, get_db
 import models
 import schemas
 import hashing
+import utils
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -23,10 +24,6 @@ models.Base.metadata.create_all(bind=engine) # Create the tables
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
 # FastAPI routes
-
-def update_object_attributes(user_in, user): # TODO: move to a separate file?
-    for attr, value in user_in.dict().items():
-        setattr(user, attr, value)
 
 @app.get("/")
 async def root():
@@ -57,7 +54,7 @@ async def read_item(item_id: int, db: db_dependency):
 async def update_item(item_id: int, item_in: schemas.ItemBase, db: db_dependency):
     try:
         item = db.query(models.Item).filter(models.Item.id == item_id).one()
-        update_object_attributes(item_in, item)
+        utils.update_object_attributes(item_in, item)
         db.commit()
         db.refresh(item)
         return item
@@ -105,7 +102,7 @@ async def get_user(user_id: int, db: db_dependency):
 async def update_user(user_id: int, user_in: schemas.UserBase, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == user_id).one()
-        update_object_attributes(user_in, user)
+        utils.update_object_attributes(user_in, user)
         db.commit()
         db.refresh(user)
         return user

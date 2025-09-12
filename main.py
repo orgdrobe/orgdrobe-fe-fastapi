@@ -9,6 +9,7 @@ from typing import Annotated, List
 from database import engine, get_db
 import models
 import schemas
+import hashing
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -75,6 +76,8 @@ async def delete_item(item_id: int, db: db_dependency):
 
 @app.post("/users", response_model=schemas.UserResponse)
 async def create_user(user_in: schemas.UserCreate, db: db_dependency):
+    hashed = hashing.get_password_hash(user_in.password)
+    user_in.password = hashed
     user = models.User(**user_in.dict())
     db.add(user)
     db.commit()

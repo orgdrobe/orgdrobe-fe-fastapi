@@ -6,11 +6,11 @@ from sqlalchemy.orm import Session
 from typing import Annotated, List
 
 # from my files
-from database import engine, get_db
-import models
-import schemas
-import hashing
-import utils
+from .database import engine, get_db
+from . import models
+from . import schemas
+from . import hashing
+from . import utils
 
 app = FastAPI(
     title="Wardrobe FastAPI",

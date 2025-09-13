@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, TIMESTAMP, text
 
-from database import Base
+from .database import Base
 
 # SQLAlchemy Models (Database Tables)
 

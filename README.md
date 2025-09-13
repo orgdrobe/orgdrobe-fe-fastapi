@@ -58,11 +58,10 @@ pip freeze > requirements.txt
 ### old
 
 ```bash
-cd app
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-`main:app` - in file "main.py" run "app". 
+`app.main:app` - from the "app" package, import "main" module and run the "app" instance.
 
 `--host 0.0.0.0` - open to a local network
 
@@ -73,8 +72,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### new
 
 ```bash
-cd app
-fastapi dev main.py
+fastapi dev app/main.py
 ```
 
 ## .env

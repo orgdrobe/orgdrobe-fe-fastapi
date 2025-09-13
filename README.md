@@ -58,6 +58,7 @@ pip freeze > requirements.txt
 ### old
 
 ```bash
+cd app
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -72,6 +73,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ### new
 
 ```bash
+cd app
 fastapi dev main.py
 ```
 

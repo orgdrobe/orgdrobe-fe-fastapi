@@ -72,8 +72,14 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ### new
 
 ```bash
-fastapi dev app/main.py
+fastapi dev app/main.py --host 0.0.0.0 --port 8000
 ```
+
+`app/main.py` - path to the FastAPI application file
+
+`--host 0.0.0.0` - open to a local network
+
+`--port 8000` - use port 8000
 
 ## .env
 

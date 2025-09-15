@@ -1,0 +1,60 @@
+from fastapi import APIRouter,  HTTPException, Depends 
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import Session
+from typing import Annotated, List
+
+from ..database import get_db
+from .. import models, schemas, hashing, utils
+
+db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
+
+users_router = APIRouter(tags=["users"])
+
+@users_router.post("/users", response_model=schemas.UserResponse)
+async def create_user(user_in: schemas.UserCreate, db: db_dependency):
+    hashed = hashing.get_password_hash(user_in.password)
+    user_in.password = hashed
+    user = models.User(**user_in.dict())
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@users_router.get("/users", response_model=List[schemas.UserResponse])
+async def list_users(db: db_dependency):
+    user_list = db.query(models.User).all()
+    return user_list
+
+# @users_router.get("/users/me") # TODO
+# async def get_current_user():
+#     return {"Message": "this is the current user"}
+
+@users_router.get("/users/{id}", response_model=schemas.UserResponse)
+async def get_user(id: int, db: db_dependency):
+    try:
+        user = db.query(models.User).filter(models.User.id == id).one()
+        return user
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="User not found")
+
+@users_router.put("/users/{id}", response_model=schemas.UserResponse)
+async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
+    try:
+        user = db.query(models.User).filter(models.User.id == id).one()
+        utils.update_object_attributes(user_in, user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="User not found")
+
+
+@users_router.delete("/users/{id}")
+def delete_user(id: int, db: db_dependency):
+    try:
+        user = db.query(models.User).filter(models.User.id == id).one()
+        db.delete(user)
+        db.commit()
+        return {"message": "User deleted successfully"}
+    except NoResultFound:
+        raise HTTPException(status_code=404, detail="User not found")

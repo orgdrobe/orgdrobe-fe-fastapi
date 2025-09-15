@@ -23,15 +23,15 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class ItemBase(BaseModel):
+class GarmentBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
     user_id: int
 
-class ItemCreate(ItemBase):
+class GarmentCreate(GarmentBase):
     pass
 
-class ItemResponse(ItemBase):
+class GarmentResponse(GarmentBase):
     id: int
     created_at: datetime
     updated_at: datetime

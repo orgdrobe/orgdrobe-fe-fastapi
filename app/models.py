@@ -22,8 +22,8 @@ class User(Base):
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
-class Item(Base):
-    __tablename__ = "items"
+class Garment(Base):
+    __tablename__ = "garments"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)

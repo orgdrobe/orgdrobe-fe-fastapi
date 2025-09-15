@@ -8,9 +8,9 @@ from .. import models, schemas, hashing, utils
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
-users_router = APIRouter(tags=["users"])
+router = APIRouter(tags=["users"])
 
-@users_router.post("/users", response_model=schemas.UserResponse)
+@router.post("/users", response_model=schemas.UserResponse)
 async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     hashed = hashing.get_password_hash(user_in.password)
     user_in.password = hashed
@@ -20,7 +20,7 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     db.refresh(user)
     return user
 
-@users_router.get("/users", response_model=List[schemas.UserResponse])
+@router.get("/users", response_model=List[schemas.UserResponse])
 async def list_users(db: db_dependency):
     user_list = db.query(models.User).all()
     return user_list
@@ -29,7 +29,7 @@ async def list_users(db: db_dependency):
 # async def get_current_user():
 #     return {"Message": "this is the current user"}
 
-@users_router.get("/users/{id}", response_model=schemas.UserResponse)
+@router.get("/users/{id}", response_model=schemas.UserResponse)
 async def get_user(id: int, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
@@ -37,7 +37,7 @@ async def get_user(id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
 
-@users_router.put("/users/{id}", response_model=schemas.UserResponse)
+@router.put("/users/{id}", response_model=schemas.UserResponse)
 async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
@@ -49,7 +49,7 @@ async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@users_router.delete("/users/{id}")
+@router.delete("/users/{id}")
 def delete_user(id: int, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()

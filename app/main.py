@@ -27,5 +27,5 @@ db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 async def root():
     return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
-app.include_router(garment.garments_router)
-app.include_router(user.users_router)
+app.include_router(garment.router)
+app.include_router(user.router)

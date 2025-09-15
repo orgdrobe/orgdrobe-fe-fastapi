@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends 
+from fastapi import APIRouter, FastAPI, HTTPException, Depends 
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
@@ -29,7 +29,9 @@ db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 async def root():
     return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
-@app.post("/garments", response_model=schemas.GarmentResponse)
+garments_router = APIRouter(tags=["garments"])
+
+@garments_router.post("/garments", response_model=schemas.GarmentResponse)
 async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     garment = models.Garment(**garment_in.dict())
     db.add(garment)
@@ -37,12 +39,12 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     db.refresh(garment)
     return garment
 
-@app.get("/garments", response_model=List[schemas.GarmentResponse])
+@garments_router.get("/garments", response_model=List[schemas.GarmentResponse])
 async def list_garments(db: db_dependency):
     garment_list = db.query(models.Garment).all()
     return garment_list
 
-@app.get("/garments/{id}", response_model=schemas.GarmentResponse)
+@garments_router.get("/garments/{id}", response_model=schemas.GarmentResponse)
 async def read_garment(id: int, db: db_dependency):
     try:
         garment = db.query(models.Garment).filter(models.Garment.id == id).one()
@@ -50,7 +52,7 @@ async def read_garment(id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Garment not found")
 
-@app.put("/garments/{id}", response_model=schemas.GarmentResponse)
+@garments_router.put("/garments/{id}", response_model=schemas.GarmentResponse)
 async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_dependency):
     try:
         garment = db.query(models.Garment).filter(models.Garment.id == id).one()
@@ -61,7 +63,7 @@ async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_depend
     except NoResultFound:
         raise HTTPException(status_code=404, detail=f"User {id} not found")
 
-@app.delete("/garments/{id}")
+@garments_router.delete("/garments/{id}")
 async def delete_garment(id: int, db: db_dependency):
     try:
         user = db.query(models.Garment).filter(models.Garment.id == id).one()
@@ -71,7 +73,11 @@ async def delete_garment(id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail=f"Garment {id} not found")
 
-@app.post("/users", response_model=schemas.UserResponse)
+app.include_router(garments_router)
+
+users_router = APIRouter(tags=["users"])
+
+@users_router.post("/users", response_model=schemas.UserResponse)
 async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     hashed = hashing.get_password_hash(user_in.password)
     user_in.password = hashed
@@ -81,16 +87,16 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     db.refresh(user)
     return user
 
-@app.get("/users", response_model=List[schemas.UserResponse])
+@users_router.get("/users", response_model=List[schemas.UserResponse])
 async def list_users(db: db_dependency):
     user_list = db.query(models.User).all()
     return user_list
 
-# @app.get("/users/me") # TODO
+# @users_router.get("/users/me") # TODO
 # async def get_current_user():
 #     return {"Message": "this is the current user"}
 
-@app.get("/users/{id}", response_model=schemas.UserResponse)
+@users_router.get("/users/{id}", response_model=schemas.UserResponse)
 async def get_user(id: int, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
@@ -98,7 +104,7 @@ async def get_user(id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
 
-@app.put("/users/{id}", response_model=schemas.UserResponse)
+@users_router.put("/users/{id}", response_model=schemas.UserResponse)
 async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
@@ -110,7 +116,7 @@ async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@app.delete("/users/{id}")
+@users_router.delete("/users/{id}")
 def delete_user(id: int, db: db_dependency):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
@@ -119,3 +125,5 @@ def delete_user(id: int, db: db_dependency):
         return {"message": "User deleted successfully"}
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
+
+app.include_router(users_router)

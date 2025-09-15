@@ -29,7 +29,7 @@ db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 async def root():
     return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
-@app.post("/garments/", response_model=schemas.GarmentResponse)
+@app.post("/garments", response_model=schemas.GarmentResponse)
 async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     garment = models.Garment(**garment_in.dict())
     db.add(garment)
@@ -42,34 +42,34 @@ async def list_garments(db: db_dependency):
     garment_list = db.query(models.Garment).all()
     return garment_list
 
-@app.get("/garments/{garment_id}", response_model=schemas.GarmentResponse)
-async def read_garment(garment_id: int, db: db_dependency):
+@app.get("/garments/{id}", response_model=schemas.GarmentResponse)
+async def read_garment(id: int, db: db_dependency):
     try:
-        garment = db.query(models.Garment).filter(models.Garment.id == garment_id).one()
+        garment = db.query(models.Garment).filter(models.Garment.id == id).one()
         return garment
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Garment not found")
 
-@app.put("/garments/{garment_id}", response_model=schemas.GarmentResponse)
-async def update_garment(garment_id: int, garment_in: schemas.GarmentBase, db: db_dependency):
+@app.put("/garments/{id}", response_model=schemas.GarmentResponse)
+async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_dependency):
     try:
-        garment = db.query(models.Garment).filter(models.Garment.id == garment_id).one()
+        garment = db.query(models.Garment).filter(models.Garment.id == id).one()
         utils.update_object_attributes(garment_in, garment)
         db.commit()
         db.refresh(garment)
         return garment
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"User {garment_id} not found")
+        raise HTTPException(status_code=404, detail=f"User {id} not found")
 
-@app.delete("/garments/{garment_id}")
-async def delete_garment(garment_id: int, db: db_dependency):
+@app.delete("/garments/{id}")
+async def delete_garment(id: int, db: db_dependency):
     try:
-        user = db.query(models.Garment).filter(models.Garment.id == garment_id).one()
+        user = db.query(models.Garment).filter(models.Garment.id == id).one()
         db.delete(user)
         db.commit()
-        return {"message": f"Garment {garment_id} deleted successfully"}
+        return {"message": f"Garment {id} deleted successfully"}
     except NoResultFound:
-        raise HTTPException(status_code=404, detail=f"Garment {garment_id} not found")
+        raise HTTPException(status_code=404, detail=f"Garment {id} not found")
 
 @app.post("/users", response_model=schemas.UserResponse)
 async def create_user(user_in: schemas.UserCreate, db: db_dependency):
@@ -90,18 +90,18 @@ async def list_users(db: db_dependency):
 # async def get_current_user():
 #     return {"Message": "this is the current user"}
 
-@app.get("/users/{user_id}", response_model=schemas.UserResponse)
-async def get_user(user_id: int, db: db_dependency):
+@app.get("/users/{id}", response_model=schemas.UserResponse)
+async def get_user(id: int, db: db_dependency):
     try:
-        user = db.query(models.User).filter(models.User.id == user_id).one()
+        user = db.query(models.User).filter(models.User.id == id).one()
         return user
     except NoResultFound:
         raise HTTPException(status_code=404, detail="User not found")
 
-@app.put("/users/{user_id}", response_model=schemas.UserResponse)
-async def update_user(user_id: int, user_in: schemas.UserBase, db: db_dependency):
+@app.put("/users/{id}", response_model=schemas.UserResponse)
+async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
     try:
-        user = db.query(models.User).filter(models.User.id == user_id).one()
+        user = db.query(models.User).filter(models.User.id == id).one()
         utils.update_object_attributes(user_in, user)
         db.commit()
         db.refresh(user)
@@ -110,10 +110,10 @@ async def update_user(user_id: int, user_in: schemas.UserBase, db: db_dependency
         raise HTTPException(status_code=404, detail="User not found")
 
 
-@app.delete("/users/{user_id}")
-def delete_user(user_id: int, db: db_dependency):
+@app.delete("/users/{id}")
+def delete_user(id: int, db: db_dependency):
     try:
-        user = db.query(models.User).filter(models.User.id == user_id).one()
+        user = db.query(models.User).filter(models.User.id == id).one()
         db.delete(user)
         db.commit()
         return {"message": "User deleted successfully"}

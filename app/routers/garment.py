@@ -8,9 +8,12 @@ from .. import models, schemas, utils
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
-router = APIRouter(tags=["garments"])
+router = APIRouter(
+    tags=["garments"],
+    prefix="/garments"
+)
 
-@router.post("/garments", response_model=schemas.GarmentResponse)
+@router.post("/", response_model=schemas.GarmentResponse)
 async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     garment = models.Garment(**garment_in.dict())
     db.add(garment)
@@ -18,12 +21,12 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     db.refresh(garment)
     return garment
 
-@router.get("/garments", response_model=List[schemas.GarmentResponse])
+@router.get("/", response_model=List[schemas.GarmentResponse])
 async def list_garments(db: db_dependency):
     garment_list = db.query(models.Garment).all()
     return garment_list
 
-@router.get("/garments/{id}", response_model=schemas.GarmentResponse)
+@router.get("/{id}", response_model=schemas.GarmentResponse)
 async def read_garment(id: int, db: db_dependency):
     try:
         garment = db.query(models.Garment).filter(models.Garment.id == id).one()
@@ -31,7 +34,7 @@ async def read_garment(id: int, db: db_dependency):
     except NoResultFound:
         raise HTTPException(status_code=404, detail="Garment not found")
 
-@router.put("/garments/{id}", response_model=schemas.GarmentResponse)
+@router.put("/{id}", response_model=schemas.GarmentResponse)
 async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_dependency):
     try:
         garment = db.query(models.Garment).filter(models.Garment.id == id).one()
@@ -42,7 +45,7 @@ async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_depend
     except NoResultFound:
         raise HTTPException(status_code=404, detail=f"User {id} not found")
 
-@router.delete("/garments/{id}")
+@router.delete("/{id}")
 async def delete_garment(id: int, db: db_dependency):
     try:
         user = db.query(models.Garment).filter(models.Garment.id == id).one()

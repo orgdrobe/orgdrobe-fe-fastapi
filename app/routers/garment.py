@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends 
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import Session
-from typing import Annotated, List
+from typing import Annotated
 
 from ..database import get_db
 from .. import models, schemas, utils
@@ -21,7 +21,7 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency):
     db.refresh(garment)
     return garment
 
-@router.get("/", response_model=List[schemas.GarmentResponse])
+@router.get("/", response_model=list[schemas.GarmentResponse])
 async def list_garments(db: db_dependency):
     garment_list = db.query(models.Garment).all()
     return garment_list

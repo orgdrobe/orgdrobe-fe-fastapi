@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends 
 from sqlalchemy.orm import Session
-from typing import Annotated, List
+from typing import Annotated
 
 # from my files
 from .database import engine, get_db

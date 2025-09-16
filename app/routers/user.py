@@ -1,7 +1,7 @@
 from fastapi import APIRouter,  HTTPException, Depends 
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import Session
-from typing import Annotated, List
+from typing import Annotated
 
 from ..database import get_db
 from .. import models, schemas, hashing, utils
@@ -23,7 +23,7 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     db.refresh(user)
     return user
 
-@router.get("/", response_model=List[schemas.UserResponse])
+@router.get("/", response_model=list[schemas.UserResponse])
 async def list_users(db: db_dependency):
     user_list = db.query(models.User).all()
     return user_list

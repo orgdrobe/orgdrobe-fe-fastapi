@@ -1,7 +1,4 @@
-from fastapi import APIRouter, FastAPI, HTTPException, Depends 
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
+from fastapi import FastAPI, Depends 
 from sqlalchemy.orm import Session
 from typing import Annotated, List
 

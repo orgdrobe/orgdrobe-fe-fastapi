@@ -1,5 +1,4 @@
-from pydantic import BaseModel, constr, EmailStr, Field
-from typing import List, Optional, Union
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
 # Pydantic Models (Data Validation & Serialization) (for API clients)

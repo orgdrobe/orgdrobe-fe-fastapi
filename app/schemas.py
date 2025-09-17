@@ -22,6 +22,11 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class UserEmailPassword(BaseModel):
+    email: EmailStr = Field(...)
+    password: str = Field(..., min_length=8, max_length=100)
+
+
 class GarmentBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)

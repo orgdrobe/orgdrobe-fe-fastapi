@@ -5,7 +5,7 @@ from typing import Annotated
 # from my files
 from .database import engine, get_db
 from . import models
-from .routers import user, garment
+from .routers import user, garment, auth
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -26,3 +26,4 @@ async def root():
 
 app.include_router(garment.router)
 app.include_router(user.router)
+app.include_router(auth.router)

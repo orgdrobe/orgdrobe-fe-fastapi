@@ -22,7 +22,7 @@ Contact me or see what I'm up to - [maksstep.com](https://maksstep.com) or [link
 python3 -m venv .venv-debian
 source .venv-debian/bin/activate
 
-pip install -r requirements.txt
+pip install -r requirements_manual.txt
 # or alternatively install from requirements.txt 
 
 # ...

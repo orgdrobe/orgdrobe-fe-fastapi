@@ -10,7 +10,7 @@ from .. import models, schemas, hashing, oauth2
 db_dependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(
     tags=["auth"],
-    # prefix="/auth"
+    prefix="/auth"
 )
 
 @router.post("/email")

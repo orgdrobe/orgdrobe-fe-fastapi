@@ -6,3 +6,4 @@ python-dotenv
 bcrypt
 passlib
 pyjwt
+python-jose[cryptography]

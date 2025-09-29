@@ -26,6 +26,13 @@ class UserEmailPassword(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(..., min_length=8, max_length=100)
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: int 
+
 
 class GarmentBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)

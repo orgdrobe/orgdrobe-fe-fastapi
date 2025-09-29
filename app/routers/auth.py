@@ -13,7 +13,8 @@ router = APIRouter(
     prefix="/auth"
 )
 
-@router.post("/email")
+# login with email
+@router.post("/email", response_model=schemas.Token)
 async def login_email(db: db_dependency, credentials: OAuth2PasswordRequestForm = Depends()):
     try:
         user = db.query(models.User).filter(models.User.email == credentials.username).one()
@@ -24,4 +25,4 @@ async def login_email(db: db_dependency, credentials: OAuth2PasswordRequestForm 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid credentials")
     
     access_token = oauth2.create_access_token(data={"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer" } 
+    return schemas.Token(access_token=access_token, token_type="bearer")

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from ..database import get_db
-from .. import models, schemas, hashing, utils
+from .. import models, schemas, hashing, utils, oauth2
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
@@ -24,7 +24,7 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     return user
 
 @router.get("/", response_model=list[schemas.UserResponse])
-async def list_users(db: db_dependency):
+async def list_users(db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
     user_list = db.query(models.User).all()
     return user_list
 
@@ -33,7 +33,7 @@ async def list_users(db: db_dependency):
 #     return {"Message": "this is the current user"}
 
 @router.get("/{id}", response_model=schemas.UserResponse)
-async def get_user(id: int, db: db_dependency):
+async def get_user(id: int, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         return user
@@ -41,7 +41,7 @@ async def get_user(id: int, db: db_dependency):
         raise HTTPException(status_code=404, detail="User not found")
 
 @router.put("/{id}", response_model=schemas.UserResponse)
-async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
+async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         utils.update_object_attributes(user_in, user)
@@ -53,7 +53,7 @@ async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency):
 
 
 @router.delete("/{id}")
-def delete_user(id: int, db: db_dependency):
+def delete_user(id: int, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         db.delete(user)

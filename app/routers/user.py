@@ -28,10 +28,6 @@ async def list_users(db: db_dependency, current_user: int = Depends(oauth2.get_c
     user_list = db.query(models.User).all()
     return user_list
 
-# @users_router.get("/users/me") # TODO
-# async def get_current_user():
-#     return {"Message": "this is the current user"}
-
 @router.get("/{id}", response_model=schemas.UserResponse)
 async def get_user(id: int, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
     try:

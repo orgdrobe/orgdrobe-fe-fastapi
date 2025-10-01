@@ -38,7 +38,7 @@ def verify_access_token(token: str, credentials_exception):
         raise credentials_exception
     return token_data
 
-def get_current_user(db: db_dependency, token: str = Depends(oauth_scheme)):
+def get_current_user(db: db_dependency, token: str = Depends(oauth_scheme)) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, 
         detail="could not validate credentials", 

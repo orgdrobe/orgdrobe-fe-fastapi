@@ -24,12 +24,12 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     return user
 
 @router.get("/", response_model=list[schemas.UserResponse])
-async def list_users(db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
+async def list_users(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     user_list = db.query(models.User).all()
     return user_list
 
 @router.get("/{id}", response_model=schemas.UserResponse)
-async def get_user(id: int, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
+async def get_user(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         return user
@@ -37,7 +37,7 @@ async def get_user(id: int, db: db_dependency, current_user: int = Depends(oauth
         raise HTTPException(status_code=404, detail="User not found")
 
 @router.put("/{id}", response_model=schemas.UserResponse)
-async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
+async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         utils.update_object_attributes(user_in, user)
@@ -49,7 +49,7 @@ async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, cur
 
 
 @router.delete("/{id}")
-def delete_user(id: int, db: db_dependency, current_user: int = Depends(oauth2.get_current_user)):
+def delete_user(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
         db.delete(user)

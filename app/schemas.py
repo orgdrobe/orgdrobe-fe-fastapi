@@ -39,8 +39,9 @@ class GarmentBase(BaseModel):
     description: str | None = Field(default=None,  min_length=1)
     user_id: int
 
-class GarmentCreate(GarmentBase):
-    pass
+class GarmentCreate(BaseModel):
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
 
 class GarmentResponse(GarmentBase):
     id: int

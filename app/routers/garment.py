@@ -15,7 +15,7 @@ router = APIRouter(
 
 @router.post("/", response_model=schemas.GarmentResponse)
 async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
-    garment = models.Garment(**garment_in.dict())
+    garment = models.Garment(**garment_in.dict(), user_id = current_user.id)
     db.add(garment)
     db.commit()
     db.refresh(garment)

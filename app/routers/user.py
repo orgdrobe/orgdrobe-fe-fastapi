@@ -23,7 +23,7 @@ async def create_user(user_in: schemas.UserCreate, db: db_dependency):
     db.refresh(user)
     return user
 
-@router.get("/", response_model=list[schemas.UserResponse])
+@router.get("/", response_model=list[schemas.UserResponsePublic])
 async def list_users(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     user_list = db.query(models.User).all()
     return user_list
@@ -32,7 +32,7 @@ async def list_users(db: db_dependency, current_user: models.User = Depends(oaut
 async def get_user_mylesf(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     return current_user
 
-@router.get("/{id}", response_model=schemas.UserResponse)
+@router.get("/{id}", response_model=schemas.UserResponsePublic)
 async def get_user(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()

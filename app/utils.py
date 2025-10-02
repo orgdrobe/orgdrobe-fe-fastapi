@@ -1,3 +1,3 @@
-def update_object_attributes(user_in, user):
-    for attr, value in user_in.dict().items():
-        setattr(user, attr, value)
+def update_object_attributes(obj_in, obj_out):
+    for attr, value in obj_in.dict().items():
+        setattr(obj_out, attr, value)

@@ -44,6 +44,10 @@ async def get_user(id: int, db: db_dependency, current_user: models.User = Depen
 async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
+
+        if user.id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
         utils.update_object_attributes(user_in, user)
         db.commit()
         db.refresh(user)
@@ -56,6 +60,10 @@ async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, cur
 def delete_user(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
+
+        if user.id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
         db.delete(user)
         db.commit()
         return {"message": "User deleted successfully"}

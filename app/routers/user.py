@@ -28,6 +28,10 @@ async def list_users(db: db_dependency, current_user: models.User = Depends(oaut
     user_list = db.query(models.User).all()
     return user_list
 
+@router.get("/users/me", response_model=schemas.UserResponse)
+async def get_user_mylesf(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
+    return current_user
+
 @router.get("/{id}", response_model=schemas.UserResponse)
 async def get_user(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:

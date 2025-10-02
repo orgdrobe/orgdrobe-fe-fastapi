@@ -38,6 +38,10 @@ async def read_garment(id: int, db: db_dependency):
 async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
         garment = db.query(models.Garment).filter(models.Garment.id == id).one()
+
+        if garment.user_id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
         utils.update_object_attributes(garment_in, garment)
         db.commit()
         db.refresh(garment)

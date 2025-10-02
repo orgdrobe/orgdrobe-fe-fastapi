@@ -22,6 +22,12 @@ class UserResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+class UserResponsePublic(BaseModel):
+    id: int
+    login: str = Field(..., min_length=1, max_length=100)
+    name: str | None = Field(default=None,  min_length=1)
+    picture: str | None = Field(default=None,  min_length=1) 
+
 class UserEmailPassword(BaseModel):
     email: EmailStr = Field(...)
     password: str = Field(..., min_length=8, max_length=100)

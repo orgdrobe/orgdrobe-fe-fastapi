@@ -48,8 +48,8 @@ async def update_garment(id: int, garment_in: schemas.GarmentBase, db: db_depend
 @router.delete("/{id}")
 async def delete_garment(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:
-        user = db.query(models.Garment).filter(models.Garment.id == id).one()
-        db.delete(user)
+        garment = db.query(models.Garment).filter(models.Garment.id == id).one()
+        db.delete(garment)
         db.commit()
         return {"message": f"Garment {id} deleted successfully"}
     except NoResultFound:

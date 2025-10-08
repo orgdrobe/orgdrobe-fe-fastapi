@@ -5,7 +5,7 @@ from typing import Annotated
 # from my files
 from .database import engine, get_db
 from . import models
-from .routers import user, garment, auth
+from .routers import user, garment, auth, outfit
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -25,5 +25,6 @@ async def root():
     return {"openapi swagger":"http://127.0.0.1:8000/docs", "redoc":"http://127.0.0.1:8000/redoc"}
 
 app.include_router(garment.router)
+app.include_router(outfit.router)
 app.include_router(user.router)
 app.include_router(auth.router)

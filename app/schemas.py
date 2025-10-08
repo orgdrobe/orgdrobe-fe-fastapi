@@ -40,6 +40,23 @@ class TokenData(BaseModel):
     id: int 
 
 
+class OutfitBase(BaseModel):
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    user_id: int
+
+class OutfitCreate(BaseModel):
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+
+class OutfitResponse(OutfitBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    # class Config:
+    #     from_attributes = True
+
+
 class GarmentBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)

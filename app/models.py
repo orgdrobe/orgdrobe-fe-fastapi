@@ -45,3 +45,14 @@ class Outfit(Base):
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class OutfitGarment(Base):
+    __tablename__ = "outfit_garments"
+    
+    outfit_id = Column(Integer, ForeignKey('outfits.id'), primary_key=True, nullable=False)
+    garment_id = Column(Integer, ForeignKey('garments.id'), primary_key=True, nullable=False)
+
+    order = Column(Integer, default=0)
+    notes = Column(String)
+
+    added_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

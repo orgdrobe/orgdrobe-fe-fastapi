@@ -43,11 +43,13 @@ class TokenData(BaseModel):
 class OutfitBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
+    image: str | None = Field(default=None,  min_length=1)
     user_id: int
 
 class OutfitCreate(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
+    image: str | None = Field(default=None,  min_length=1)
 
 class OutfitResponse(OutfitBase):
     id: int
@@ -60,11 +62,13 @@ class OutfitResponse(OutfitBase):
 class GarmentBase(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
+    image: str | None = Field(default=None,  min_length=1)
     user_id: int
 
 class GarmentCreate(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
+    image: str | None = Field(default=None,  min_length=1)
 
 class GarmentResponse(GarmentBase):
     id: int

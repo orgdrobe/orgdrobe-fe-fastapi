@@ -124,3 +124,29 @@ async def add_garment_to_outfit(outfit_id: int, garment_id: int, db: db_dependen
     db.commit()
     
     return {"message": f"Garment {garment_id} added to outfit {outfit_id} successfully"}
+
+@router.delete("/{outfit_id}/garments/{garment_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_garment_from_outfit(outfit_id: int, garment_id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)
+):
+    outfit = db.query(models.Outfit).filter(models.Outfit.id == outfit_id).first()
+    if not outfit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outfit not found")
+    
+    garment = db.query(models.Garment).filter(models.Garment.id == garment_id).first()
+    if not garment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Garment not found")
+    
+    if outfit.user_id != current_user.id or garment.user_id != current_user.id :
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    outfit_garment = db.query(models.OutfitGarment).filter(
+        models.OutfitGarment.outfit_id == outfit_id,
+        models.OutfitGarment.garment_id == garment_id
+    ).first()
+    if not outfit_garment:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Garment is not in this outfit")
+    
+    db.delete(outfit_garment)
+    db.commit()
+
+    return {"message": f"Garment {garment_id} deleted from outfit {outfit_id} successfully"}

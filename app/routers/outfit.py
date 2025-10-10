@@ -88,3 +88,39 @@ async def get_outfit_garments(id: int, db: db_dependency, current_user: schemas.
     ).all()
     
     return garments
+
+@router.post("/{outfit_id}/garments/{garment_id}", status_code=status.HTTP_201_CREATED)
+async def add_garment_to_outfit(outfit_id: int, garment_id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)
+):
+    outfit = db.query(models.Outfit).filter(models.Outfit.id == outfit_id).first()
+    if not outfit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outfit not found")
+    
+    garment = db.query(models.Garment).filter(models.Garment.id == garment_id).first()
+    if not garment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Garment not found")
+    
+    if outfit.user_id != current_user.id or garment.user_id != current_user.id :
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    existing = db.query(models.OutfitGarment).filter(
+        models.OutfitGarment.outfit_id == outfit_id,
+        models.OutfitGarment.garment_id == garment_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Garment already in outfit")
+
+    max_order_result = db.query(func.max(models.OutfitGarment.order)).filter(
+        models.OutfitGarment.outfit_id == outfit_id
+    ).scalar()
+    next_order = 0 if max_order_result is None else max_order_result + 1
+    
+    outfit_garment = models.OutfitGarment(
+        outfit_id=outfit_id,
+        garment_id=garment_id,
+        order=next_order
+    )
+    db.add(outfit_garment)
+    db.commit()
+    
+    return {"message": f"Garment {garment_id} added to outfit {outfit_id} successfully"}

@@ -1,3 +1,6 @@
+from datetime import datetime, timezone
+
+
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, text
 
 from .database import Base
@@ -19,7 +22,7 @@ class User(Base):
     picture = Column(String)
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=datetime.now(timezone.utc))
 
 
 class Garment(Base):
@@ -33,7 +36,7 @@ class Garment(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=datetime.now(timezone.utc))
 
 class Outfit(Base):
     __tablename__ = "outfits"
@@ -46,7 +49,7 @@ class Outfit(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=datetime.now(timezone.utc))
 
 class OutfitGarment(Base):
     __tablename__ = "outfit_garments"

@@ -42,6 +42,8 @@ async def get_user(id: int, db: db_dependency, current_user: models.User = Depen
 
 @router.put("/{id}", response_model=schemas.UserResponse)
 async def update_user(id: int, user_in: schemas.UserBase, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
+    hashed = hashing.get_password_hash(user_in.password)
+    user_in.password = hashed
     try:
         user = db.query(models.User).filter(models.User.id == id).one()
 

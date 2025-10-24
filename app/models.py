@@ -61,3 +61,16 @@ class OutfitGarment(Base):
     notes = Column(String)
 
     added_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class ImageInfo(Base):
+    __tablename__ = "images_info"
+    
+    id = Column(Integer, primary_key=True, index=True)
+
+    filename_store = Column(String, nullable=False)
+    filename_original = Column(String)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))

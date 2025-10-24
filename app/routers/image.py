@@ -80,3 +80,27 @@ async def get_image_file_info(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     return image_info
+
+@router.delete("/{filename}", status_code=status.HTTP_204_NO_CONTENT)
+async def get_image_file(
+    filename: str,
+    db: db_dependency, 
+    current_user: models.User = Depends(dependency=oauth2.get_current_user)
+):
+    image_info = db.query(models.ImageInfo).filter(models.ImageInfo.filename_store==filename).first()
+    if not image_info:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    if image_info.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    full_path = os.path.join(PATH_TO_IMAGES, filename)
+
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    db.delete(image_info)
+    db.commit()
+
+    return {"message": f"Image {image_info.filename_original} ({image_info.filename_store}) deleted successfully"}
+

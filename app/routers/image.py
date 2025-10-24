@@ -65,3 +65,18 @@ async def get_image_file(
     if not os.path.exists(full_path):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return FileResponse(path=full_path)
+
+@router.get("/{filename}/info", response_model=schemas.ImageInfoResponse)
+async def get_image_file_info(
+    filename: str,
+    db: db_dependency, 
+    current_user: models.User = Depends(dependency=oauth2.get_current_user)
+):
+    image_info = db.query(models.ImageInfo).filter(models.ImageInfo.filename_store==filename).first()
+    if not image_info:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    if image_info.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    return image_info

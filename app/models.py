@@ -1,6 +1,4 @@
 from datetime import datetime, timezone
-
-
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, text
 
 from .database import Base
@@ -19,7 +17,8 @@ class User(Base):
     password = Column(String, nullable=False)
     
     name = Column(String)
-    picture = Column(String)
+    image_link: Column[str] = Column(String)
+    image_id: Column[int] = Column(Integer, ForeignKey("images_info.id"))
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
@@ -31,9 +30,10 @@ class Garment(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     description = Column(String)
-    image = Column(String)
+    image_link: Column[str] = Column(String)
     
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    image_id = Column(Integer, ForeignKey("images_info.id"))
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
@@ -44,9 +44,10 @@ class Outfit(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     description = Column(String)
-    image = Column(String)
+    image_link: Column[str] = Column(String)
     
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    image_id: Column[int] = Column(Integer, ForeignKey("images_info.id"))
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))

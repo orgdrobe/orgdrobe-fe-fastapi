@@ -76,3 +76,18 @@ class GarmentResponse(GarmentBase):
     updated_at: datetime
     # class Config:
     #     from_attributes = True
+
+
+class ImageInfoCreate(BaseModel):
+    filename_store: str | None = Field(default=None,  min_length=1)
+    filename_original: str | None = Field(default=None,  min_length=1)
+
+class ImageInfoBase(BaseModel):
+    filename_store: str | None = Field(default=None,  min_length=1)
+    filename_original: str | None = Field(default=None,  min_length=1)
+    user_id: int
+
+class ImageInfoResponse(ImageInfoBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime

@@ -24,7 +24,7 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.ImageInfoResponse)
-async def upload_image_file(
+async def upload_image(
     file_in: UploadFile,
     db: db_dependency, 
     current_user: models.User = Depends(dependency=oauth2.get_current_user)
@@ -67,7 +67,7 @@ async def get_image_file(
     return FileResponse(path=full_path)
 
 @router.get("/{filename}/info", response_model=schemas.ImageInfoResponse)
-async def get_image_file_info(
+async def get_image_info(
     filename: str,
     db: db_dependency, 
     current_user: models.User = Depends(dependency=oauth2.get_current_user)
@@ -82,7 +82,7 @@ async def get_image_file_info(
     return image_info
 
 @router.delete("/{filename}", status_code=status.HTTP_204_NO_CONTENT)
-async def get_image_file(
+async def delete_image(
     filename: str,
     db: db_dependency, 
     current_user: models.User = Depends(dependency=oauth2.get_current_user)

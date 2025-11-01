@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends 
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Annotated
 
@@ -13,6 +14,19 @@ app = FastAPI(
     version="0.0.1",
     docs_url="/docs"
 ) # Create the FastAPI instance
+
+
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 models.Base.metadata.create_all(bind=engine) # Create the tables
 

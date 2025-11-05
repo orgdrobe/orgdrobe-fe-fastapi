@@ -37,6 +37,14 @@ class Garment(Base):
     last_worn: Mapped[Optional[datetime]]
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     image_id = Column(Integer, ForeignKey("images_info.id"))
+
+    gender_id = Column(Integer, ForeignKey("genders.id"))
+    category_master_id = Column(Integer, ForeignKey("categories_master.id"))
+    category_sub_id = Column(Integer, ForeignKey("categories_sub.id"))
+    type_id = Column(Integer, ForeignKey("types.id"))
+    color_id = Column(Integer, ForeignKey("colors.id")) # because of the dataset
+    season_id = Column(Integer, ForeignKey("seasons.id"))
+    usage_id = Column(Integer, ForeignKey("usages.id"))
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))

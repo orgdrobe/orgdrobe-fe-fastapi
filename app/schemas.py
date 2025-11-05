@@ -71,6 +71,13 @@ class GarmentBase(BaseModel):
     # image_id: int | None
     user_id: int
     last_worn: datetime | None = Field(default=None)
+    gender_id: int | None = Field(default=None)
+    category_master_id: int | None = Field(default=None)
+    category_sub_id: int | None = Field(default=None)
+    type_id: int | None = Field(default=None)
+    color_id: int | None = Field(default=None)
+    season_id: int | None = Field(default=None)
+    usage_id: int | None = Field(default=None)
 
 class GarmentCreate(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
@@ -78,6 +85,13 @@ class GarmentCreate(BaseModel):
     image_link: str | None = Field(default=None,  min_length=1)
     # image_id: int | None
     last_worn: datetime | None = Field(default=None)
+    gender_id: int | None = Field(default=None)
+    category_master_id: int | None = Field(default=None)
+    category_sub_id: int | None = Field(default=None)
+    type_id: int | None = Field(default=None)
+    color_id: int | None = Field(default=None)
+    season_id: int | None = Field(default=None)
+    usage_id: int | None = Field(default=None)
 
 class GarmentResponse(GarmentBase):
     id: int

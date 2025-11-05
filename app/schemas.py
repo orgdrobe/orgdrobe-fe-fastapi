@@ -78,6 +78,7 @@ class GarmentBase(BaseModel):
     color_id: int | None = Field(default=None)
     season_id: int | None = Field(default=None)
     usage_id: int | None = Field(default=None)
+    hex: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
 
 class GarmentCreate(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
@@ -92,6 +93,7 @@ class GarmentCreate(BaseModel):
     color_id: int | None = Field(default=None)
     season_id: int | None = Field(default=None)
     usage_id: int | None = Field(default=None)
+    hex: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
 
 class GarmentResponse(GarmentBase):
     id: int

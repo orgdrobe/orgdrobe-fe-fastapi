@@ -33,7 +33,7 @@ class Garment(Base):
     name = Column(String, index=True)
     description = Column(String)
     image_link: Column[str] = Column(String)
-    
+    hex = Column(String(7))
     last_worn: Mapped[Optional[datetime]]
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     image_id = Column(Integer, ForeignKey("images_info.id"))
@@ -48,6 +48,9 @@ class Garment(Base):
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
+    __table_args__ = (
+        CheckConstraint("hex ~ '^#[0-9A-Fa-f]{6}$'", name="hex_regex"),
+    )
 
 class Outfit(Base):
     __tablename__ = "outfits"

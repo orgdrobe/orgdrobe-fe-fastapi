@@ -4,3 +4,20 @@ architecture of FastAPI (kinda, i think):
 - models -> database
 
 ---
+
+Copy Paste commands 
+
+```
+python -m venv .venv-win
+.venv-win\Scripts\activate
+pip install -r requirements_manual.txt
+pip freeze > requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+```
+
+```
+.venv-win\Scripts\activate
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+```

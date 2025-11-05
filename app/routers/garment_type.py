@@ -7,17 +7,17 @@ from .. import models, schemas, oauth2
 
 db_dependency = Annotated[Session, Depends(get_db)]
 router = APIRouter(
-    tags=["types"],
-    prefix="/types"
+    tags=["garment-types"],
+    prefix="/garment-types"
 )
 
-@router.get("/", response_model=list[schemas.TypeResponse])
-async def types_all(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
-    return db.query(models.Type).all()
+@router.get("/", response_model=list[schemas.GarmentTypeResponse])
+async def garment_types_all(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
+    return db.query(models.GarmentType).all()
 
-@router.get("/{id}", response_model=schemas.TypeResponse)
-async def type_by_id(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
-    item = db.query(models.Type).filter(models.Type.id == id).first()
+@router.get("/{id}", response_model=schemas.GarmentTypeResponse)
+async def garment_type_by_id(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
+    item = db.query(models.GarmentType).filter(models.GarmentType.id == id).first()
     if not item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return item

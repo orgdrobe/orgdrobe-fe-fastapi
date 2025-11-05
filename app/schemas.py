@@ -138,7 +138,7 @@ class CategorySubResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-class TypeResponse(BaseModel):
+class GarmentTypeResponse(BaseModel):
     id: int
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)

@@ -6,7 +6,7 @@ from typing import Annotated
 # from my files
 from .database import engine, get_db
 from . import models
-from .routers import user, garment, auth, outfit, image, gender, category, type, color, season, usage
+from .routers import user, garment, auth, outfit, image, gender, category, garment_type, color, season, usage
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -46,7 +46,7 @@ app.include_router(auth.router)
 
 app.include_router(gender.router)
 app.include_router(category.router)
-app.include_router(type.router)
+app.include_router(garment_type.router)
 app.include_router(color.router)
 app.include_router(season.router)
 app.include_router(usage.router)

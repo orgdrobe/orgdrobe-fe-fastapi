@@ -44,7 +44,7 @@ class Garment(Base):
     type_id = Column(Integer, ForeignKey("types.id"))
     color_id = Column(Integer, ForeignKey("colors.id")) # because of the dataset
     season_id = Column(Integer, ForeignKey("seasons.id"))
-    usage_id = Column(Integer, ForeignKey("usages.id"))
+    usage_id = Column(Integer, ForeignKey("uses.id"))
     
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
@@ -144,7 +144,7 @@ class Season(Base):
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
 
 class Usage(Base):
-    __tablename__ = "usages"
+    __tablename__ = "uses"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     description = Column(String)

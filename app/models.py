@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
+from typing import Optional
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, text
+from sqlalchemy.orm import Mapped
 
 from .database import Base
 
@@ -32,6 +34,7 @@ class Garment(Base):
     description = Column(String)
     image_link: Column[str] = Column(String)
     
+    last_worn: Mapped[Optional[datetime]]
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     image_id = Column(Integer, ForeignKey("images_info.id"))
     

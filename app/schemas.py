@@ -70,12 +70,14 @@ class GarmentBase(BaseModel):
     image_link: str | None = Field(default=None,  min_length=1)
     # image_id: int | None
     user_id: int
+    last_worn: datetime | None = Field(default=None)
 
 class GarmentCreate(BaseModel):
     name: str | None = Field(default=None,  min_length=1)
     description: str | None = Field(default=None,  min_length=1)
     image_link: str | None = Field(default=None,  min_length=1)
     # image_id: int | None
+    last_worn: datetime | None = Field(default=None)
 
 class GarmentResponse(GarmentBase):
     id: int

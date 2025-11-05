@@ -116,3 +116,53 @@ class ImageInfoResponse(ImageInfoBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+class GenderResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+
+class CategoryMasterResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+
+class CategorySubResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+
+class TypeResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+
+class ColorResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    hex: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
+    created_at: datetime
+    updated_at: datetime
+
+class SeasonResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+
+class UsageResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime

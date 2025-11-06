@@ -1,12 +1,17 @@
 from fastapi import FastAPI, Depends 
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 from typing import Annotated
 
 # from my files
+from .config import config
 from .database import engine, get_db
 from . import models
 from .routers import user, garment, auth, outfit, image, gender, category, garment_type, color, season, usage
+from .seed_data import initialize_table, INITIAL_DATA
+
+SEED_DATA = config["SEED_DATA"]
 
 app = FastAPI(
     title="Wardrobe FastAPI",
@@ -27,6 +32,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Set up event listeners for seeding before table creation (before `create_all`)
+if SEED_DATA == "yes":
+    event.listen(models.User.__table__, 'after_create', initialize_table)
+    event.listen(models.Gender.__table__, 'after_create', initialize_table)
+    event.listen(models.CategoryMaster.__table__, 'after_create', initialize_table)
+    event.listen(models.CategorySub.__table__, 'after_create', initialize_table)
+    event.listen(models.GarmentType.__table__, 'after_create', initialize_table)
+    event.listen(models.Color.__table__, 'after_create', initialize_table)
+    event.listen(models.Season.__table__, 'after_create', initialize_table)
+    event.listen(models.Usage.__table__, 'after_create', initialize_table)
+
 
 models.Base.metadata.create_all(bind=engine) # Create the tables
 

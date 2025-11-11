@@ -48,18 +48,20 @@ async def upload_image(
 
     return image_info
 
+# disable auth for now
+# todo: enable and handle on frontend
 @router.get("/{filename}")
 async def get_image_file(
     filename: str,
     db: db_dependency, 
-    current_user: models.User = Depends(dependency=oauth2.get_current_user)
+    # current_user: models.User = Depends(dependency=oauth2.get_current_user)
 ):
     image_info = db.query(models.ImageInfo).filter(models.ImageInfo.filename_store==filename).first()
     if not image_info:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    if image_info.user_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    # if image_info.user_id != current_user.id:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     full_path = os.path.join(PATH_TO_IMAGES, filename)
     if not os.path.exists(full_path):

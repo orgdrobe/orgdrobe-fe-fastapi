@@ -21,6 +21,12 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency, c
     db.refresh(garment)
     return garment
 
+@router.get("/count", response_model=int)
+async def get_garments_count(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)
+):
+    garment_count = db.query(models.Garment).filter(models.Garment.user_id == current_user.id).count()
+    return garment_count
+
 @router.get("/", response_model=list[schemas.GarmentResponse])
 async def list_garments(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     garment_list = db.query(models.Garment).filter(models.Garment.user_id == current_user.id).all()

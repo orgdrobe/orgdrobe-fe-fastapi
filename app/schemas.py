@@ -102,6 +102,9 @@ class GarmentResponse(GarmentBase):
     # class Config:
     #     from_attributes = True
 
+class OutfitGarmentsUpdate(BaseModel):
+    garment_ids: list[int]
+
 
 class ImageInfoCreate(BaseModel):
     filename_store: str | None = Field(default=None,  min_length=1)

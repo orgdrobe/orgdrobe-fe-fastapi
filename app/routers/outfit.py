@@ -112,6 +112,47 @@ async def get_outfit_garments(id: int, db: db_dependency, current_user: schemas.
     
     return garments
 
+@router.put("/{id}/garments")
+async def update_outfit_garments_by_ids(
+    id: int, 
+    garments_update: schemas.OutfitGarmentsUpdate,
+    db: db_dependency, 
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Replace all garments in an outfit with new list (maintains order). (It delete all existing relationships for this outfit and then creates new relationships with order)"""
+    
+    outfit = db.query(models.Outfit).filter(models.Outfit.id == id).first()
+    if not outfit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outfit not found")
+    if outfit.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
+    garments = db.query(models.Garment).filter(
+        models.Garment.id.in_(garments_update.garment_ids)
+    ).all()
+    
+    if len(garments) != len(garments_update.garment_ids):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="One or more garments not found")
+    
+    for garment in garments:
+        if garment.user_id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't own all these garments")
+    
+    db.query(models.OutfitGarment).filter(
+        models.OutfitGarment.outfit_id == id
+    ).delete()
+    
+    for order, garment_id in enumerate(garments_update.garment_ids):
+        outfit_garment = models.OutfitGarment(
+            outfit_id=id,
+            garment_id=garment_id,
+            order=order
+        )
+        db.add(outfit_garment)
+    
+    db.commit()
+    db.refresh(outfit)
+
 @router.post("/{outfit_id}/garments/{garment_id}", status_code=status.HTTP_201_CREATED)
 async def add_garment_to_outfit(outfit_id: int, garment_id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)
 ):

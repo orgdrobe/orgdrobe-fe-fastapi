@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status 
-from sqlalchemy import func
+from sqlalchemy import func, and_, not_, exists
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import Session
 from typing import Annotated

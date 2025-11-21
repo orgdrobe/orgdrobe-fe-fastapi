@@ -68,6 +68,29 @@ async def delete_outfit(id: int, db: db_dependency, current_user: models.User = 
     except NoResultFound:
         raise HTTPException(status_code=404, detail=f"Garment {id} not found")
 
+@router.get("/{id}/garments/unused", response_model=list[schemas.GarmentResponse])
+async def get_outfit_garments_unused(id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)):
+    outfit = db.query(models.Outfit).filter(models.Outfit.id == id).one()
+    
+    if not outfit:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    if outfit.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    unused_garments = db.query(models.Garment).outerjoin(
+        models.OutfitGarment,
+        and_(
+            models.Garment.id == models.OutfitGarment.garment_id,
+            models.OutfitGarment.outfit_id == id
+        )
+    ).filter(
+        models.Garment.user_id == current_user.id,
+        models.OutfitGarment.garment_id == None
+    ).all()
+    
+    return unused_garments
+
 @router.get("/{id}/garments", response_model=list[schemas.GarmentResponse])
 async def get_outfit_garments(id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)):
     outfit = db.query(models.Outfit).filter(models.Outfit.id == id).one()

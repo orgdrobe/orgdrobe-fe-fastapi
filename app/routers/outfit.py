@@ -153,6 +153,8 @@ async def update_outfit_garments_by_ids(
     db.commit()
     db.refresh(outfit)
 
+    return {"message": f"Outfit {id} updated successfully"}
+
 @router.post("/{outfit_id}/garments/{garment_id}", status_code=status.HTTP_201_CREATED)
 async def add_garment_to_outfit(outfit_id: int, garment_id: int, db: db_dependency, current_user: schemas.TokenData = Depends(oauth2.get_current_user)
 ):

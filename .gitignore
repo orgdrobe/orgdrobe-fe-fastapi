@@ -1,3 +1,6 @@
+# When using default environment config values 
+files_storage/
+
 # editors
 .vscode
 

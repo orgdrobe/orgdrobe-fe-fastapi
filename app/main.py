@@ -9,7 +9,7 @@ from .config import config
 from .database import engine, get_db
 from . import models
 from .routers import user, garment, auth, outfit, image, gender, category, garment_type, color, season, usage
-from .seed_data import initialize_table, INITIAL_DATA
+from .seed_data import initialize_table, initialize_ml_mapping_table
 
 SEED_DATA = config["SEED_DATA"]
 
@@ -43,6 +43,7 @@ if SEED_DATA == "yes":
     event.listen(models.Color.__table__, 'after_create', initialize_table)
     event.listen(models.Season.__table__, 'after_create', initialize_table)
     event.listen(models.Usage.__table__, 'after_create', initialize_table)
+    event.listen(models.MLMapping.__table__, 'after_create', initialize_ml_mapping_table)
 
 
 models.Base.metadata.create_all(bind=engine) # Create the tables

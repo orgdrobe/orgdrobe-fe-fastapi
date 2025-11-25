@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends, status 
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile 
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import Session
 from typing import Annotated
 
 from ..database import get_db
 from .. import models, schemas, utils, oauth2
+from ..ml.garment_classify import garment_classify
+from app.schemas import GarmentClassify
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
 
@@ -20,6 +22,15 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency, c
     db.commit()
     db.refresh(garment)
     return garment
+
+@router.post("/classify", response_model=schemas.GarmentClassify)
+async def classify_garment_from_image(
+    image: UploadFile,
+    db: db_dependency, 
+    current_user: models.User = Depends(dependency=oauth2.get_current_user)
+) -> GarmentClassify:
+    garment_info = garment_classify(image, db)
+    return garment_info
 
 @router.get("/count", response_model=int)
 async def get_garments_count(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)

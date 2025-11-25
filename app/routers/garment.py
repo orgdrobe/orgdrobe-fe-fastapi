@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends, status, UploadFile 
+from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, Form
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import Session
 from typing import Annotated
+import base64, binascii
 
 from ..database import get_db
 from .. import models, schemas, utils, oauth2
@@ -25,11 +26,38 @@ async def create_garment(garment_in: schemas.GarmentCreate, db: db_dependency, c
 
 @router.post("/classify", response_model=schemas.GarmentClassify)
 async def classify_garment_from_image(
-    image: UploadFile,
     db: db_dependency, 
+    image_file: UploadFile = File(None), 
+    base64_str: str = Form(None),
     current_user: models.User = Depends(dependency=oauth2.get_current_user)
 ) -> GarmentClassify:
-    garment_info = garment_classify(image, db)
+
+    """
+    Don't send empty value(s) (don't enable the checkbox the send empty value in swagger)
+    """
+    
+    image_bytes = None
+
+    if image_file:
+        image_bytes = await image_file.read()
+    
+    elif base64_str:
+        try:
+            # Remove header if present (e.g., "data:image/jpeg;base64,...")
+            if "," in base64_str:
+                base64_str = base64_str.split(",")[1]
+            
+            image_bytes = base64.b64decode(base64_str)
+        except binascii.Error:
+            raise HTTPException(status_code=400, detail="Invalid Base64 string")
+    
+    else:
+        raise HTTPException(
+            status_code=400, 
+            detail="No image provided. Upload a file or provide a base64_str form field."
+        )
+
+    garment_info = garment_classify(image_bytes, db)
     return garment_info
 
 @router.get("/count", response_model=int)

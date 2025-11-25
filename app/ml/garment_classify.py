@@ -2,10 +2,8 @@ import io, os, pickle
 import numpy as np
 import tensorflow as tf
 
-from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from PIL import Image
-from fastapi import UploadFile
 
 from app.schemas import GarmentClassify
 from ..config import config
@@ -26,9 +24,8 @@ with open(LABEL_INFO_PATH, 'rb') as f:
     label_info = pickle.load(f)
 
 
-def preprocess_image_from_upload(file: UploadFile):
-    contents = file.file.read()
-    img = Image.open(io.BytesIO(contents))
+def preprocess_image(image_data: bytes):
+    img = Image.open(io.BytesIO(image_data))
     
     if img.mode != 'RGB':
         img = img.convert('RGB')
@@ -76,8 +73,8 @@ def get_db_ids_from_ml_predictions(predictions, db: Session):
     
     return result
 
-def garment_classify(garment_image: UploadFile, db: Session) -> GarmentClassify:
-    preprocessed_image = preprocess_image_from_upload(garment_image)
+def garment_classify(image_bytes: bytes, db: Session) -> GarmentClassify:
+    preprocessed_image = preprocess_image(image_bytes)
     predictions = model.predict(preprocessed_image)
     db_mapped_result = get_db_ids_from_ml_predictions(predictions, db)
     garment = GarmentClassify(**db_mapped_result)

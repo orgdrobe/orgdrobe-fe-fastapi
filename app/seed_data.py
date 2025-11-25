@@ -1,4 +1,69 @@
+from sqlalchemy import text, select
+import pickle
+import os
+
+from .config import config
 from . import hashing
+from . import models
+
+PATH_FILES_STORAGE = config["PATH_FILES_STORAGE"]
+PATH_FILES_STORAGE_ML_SUBDIR = config["PATH_FILES_STORAGE_ML_SUBDIR"]
+LABEL_INFO_PATH = os.path.join(PATH_FILES_STORAGE, PATH_FILES_STORAGE_ML_SUBDIR, 'label_info_with_augmentation(big).pkl')
+
+
+
+def initialize_ml_mapping_table(target, connection, **kw):
+    """
+    Populate ML mapping table by matching ML names to existing database records.
+    """
+
+    if not os.path.exists(LABEL_INFO_PATH):
+        return
+    
+    with open(LABEL_INFO_PATH, 'rb') as f:
+        ml_label_info = pickle.load(f)
+
+    category_mappings = {
+        'gender': (models.Gender, 'gender_id'),
+        'masterCategory': (models.CategoryMaster, 'category_master_id'),
+        'subCategory': (models.CategorySub, 'category_sub_id'),
+        'articleType': (models.GarmentType, 'garment_type_id'),
+        'baseColour': (models.Color, 'color_id'),
+        'season': (models.Season, 'season_id'),
+        'usage': (models.Usage, 'usage_id')
+    }
+
+    mappings_to_insert = []
+
+    for category_name, (model_class, fk_column) in category_mappings.items():
+        
+
+        mapping_dict = ml_label_info[category_name]['mapping']
+        
+        for ml_id, ml_name in mapping_dict.items():
+                        
+            query = select(model_class.id).where(model_class.name == ml_name)
+            result = connection.execute(query).fetchone()            
+                        
+            db_id = result[0]
+            mappings_to_insert.append({
+                'ml_category_id': ml_id,
+                'ml_category_name': ml_name,
+
+                'gender_id': None,
+                'category_master_id': None,
+                'category_sub_id': None,
+                'garment_type_id': None,
+                'color_id': None,
+                'season_id': None,
+                'usage_id': None,
+                
+                fk_column: db_id
+            })
+            
+    connection.execute(target.insert(), mappings_to_insert)
+
+
 
 INITIAL_DATA = {
     'users': [

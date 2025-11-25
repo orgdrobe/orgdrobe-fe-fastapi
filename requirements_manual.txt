@@ -6,3 +6,4 @@ python-dotenv
 passlib[argon2]
 pyjwt
 python-jose[cryptography]
+tensorflow

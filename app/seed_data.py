@@ -213,6 +213,7 @@ INITIAL_DATA = {
         {'name': 'Hair Accessory'}
     ],
     'colors': [
+        {'name': 'Unknown', 'hex': None, 'description': None,},
         {'name': 'Multi', 'hex': None, 'description': None,},
         {'name': 'Blue', 'hex': '#0000FF', 'description': None,},
         {'name': 'Navy Blue', 'hex': '#000080', 'description': None,},

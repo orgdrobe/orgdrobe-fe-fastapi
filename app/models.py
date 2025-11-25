@@ -151,3 +151,21 @@ class Usage(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
 
+
+class MLMapping(Base):
+    __tablename__ = "ml_mapping"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    ml_category_id = Column(Integer, nullable=False)
+    ml_category_name = Column(String, nullable=False)
+    
+    # each row only uses one FK because im too lasy to create a bunch of tables for each thing
+    gender_id = Column(Integer, ForeignKey("genders.id"), nullable=True)
+    category_master_id = Column(Integer, ForeignKey("categories_master.id"), nullable=True)
+    category_sub_id = Column(Integer, ForeignKey("categories_sub.id"), nullable=True)
+    garment_type_id = Column(Integer, ForeignKey("garment_types.id"), nullable=True)
+    color_id = Column(Integer, ForeignKey("colors.id"), nullable=True)
+    season_id = Column(Integer, ForeignKey("seasons.id"), nullable=True)
+    usage_id = Column(Integer, ForeignKey("uses.id"), nullable=True)
+    
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

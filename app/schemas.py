@@ -95,6 +95,15 @@ class GarmentCreate(BaseModel):
     usage_id: int | None = Field(default=None)
     hex: str | None = Field(default=None, pattern=r"^#[0-9A-Fa-f]{6}$")
 
+class GarmentClassify(BaseModel):
+    gender_id: int | None = Field(default=None)
+    category_master_id: int | None = Field(default=None)
+    category_sub_id: int | None = Field(default=None)
+    garment_type_id: int | None = Field(default=None)
+    color_id: int | None = Field(default=None)
+    season_id: int | None = Field(default=None)
+    usage_id: int | None = Field(default=None)
+
 class GarmentResponse(GarmentBase):
     id: int
     created_at: datetime

@@ -11,6 +11,105 @@ PATH_FILES_STORAGE_ML_SUBDIR = config["PATH_FILES_STORAGE_ML_SUBDIR"]
 LABEL_INFO_PATH = os.path.join(PATH_FILES_STORAGE, PATH_FILES_STORAGE_ML_SUBDIR, 'label_info_with_augmentation(big).pkl')
 
 
+OUTFIT_CATEGORY_INDEX_MAP = {
+    0: 'Topwear',
+    1: 'Shoes',
+    2: 'Bottomwear',
+    3: 'Bags',
+    4: 'Jewellery',
+    5: 'Watches',
+    6: 'Eyewear',
+    7: 'Belts',
+    8: 'Socks',
+    9: 'Headwear',
+    10: 'Dress',
+    11: 'Ties',
+    12: 'Scarves',
+    13: 'Gloves',
+    14: 'Wristbands'
+}
+
+OUTFIT_VECTORS = [
+    {
+        "vector": [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "name": "Standard Basic",
+        "description": "Topwear, Shoes, Bottomwear (Standard set)"
+    },
+    {
+        "vector": [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0],
+        "name": "Classic Office (Men)",
+        "description": "Topwear, Shoes, Bottomwear, Watches, Belts, Socks, Ties"
+    },
+    {
+        "vector": [0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1],
+        "name": "Evening Wear (Women)",
+        "description": "Shoes, Bags, Jewellery, Watches, Eyewear, Headwear, Dress, Scarves, Wristbands"
+    },
+    {
+        "vector": [1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0],
+        "name": "Sport Casual",
+        "description": "Topwear, Shoes, Bottomwear, Socks, Headwear, Gloves"
+    },
+    {
+        "vector": [1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+        "name": "Summer Casual",
+        "description": "Topwear, Shoes, Bottomwear, Eyewear, Socks, Headwear"
+    },
+    {
+        "vector": [1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0],
+        "name": "Winter Outfit",
+        "description": "Topwear, Shoes, Bottomwear, Socks, Headwear, Scarves, Gloves"
+    }
+]
+
+def initialize_outfit_templates(target, connection, **kw):
+
+    # 1. Fetch current Category Sub IDs from the database to map Names -> IDs
+    cat_sub_table = models.CategorySub.__table__
+    query_cats = select(cat_sub_table.c.id, cat_sub_table.c.name)
+    results_cats = connection.execute(query_cats).fetchall()
+    db_cat_map = {row.name: row.id for row in results_cats}
+
+    # 2. Prepare tables for insertion
+    outfit_template_table = models.OutfitTemplate.__table__
+    link_table = models.OutfitTemplateCategoriesSub.__table__
+
+    # 3. Iterate through vectors and insert
+    for item in OUTFIT_VECTORS:
+        vector = item["vector"]
+        name = item["name"]
+        description = item["description"]
+
+        # A. Insert Template (Unconditional insert since this is an after_create event)
+        insert_stmt = outfit_template_table.insert().values(
+            name=name,
+            description=description
+        )
+        # Execute and get the inserted ID
+        result = connection.execute(insert_stmt)
+        template_id = result.inserted_primary_key[0]
+
+        # B. Process Vector and Insert Links
+        links_to_insert = []
+        
+        for index, is_present in enumerate(vector):
+            if is_present == 1:
+                # Get the category name from the map (e.g., 0 -> 'Topwear')
+                cat_name = OUTFIT_CATEGORY_INDEX_MAP.get(index)
+                
+                # Look up the DB ID for this category name
+                if cat_name and cat_name in db_cat_map:
+                    cat_id = db_cat_map[cat_name]
+                    
+                    links_to_insert.append({
+                        'outfit_template_id': template_id,
+                        'category_sub_id': cat_id
+                    })
+        
+        # C. Insert valid links
+        if links_to_insert:
+            connection.execute(link_table.insert(), links_to_insert)
+
 
 def initialize_ml_mapping_table(target, connection, **kw):
     """

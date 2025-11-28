@@ -180,8 +180,8 @@ class OutfitTemplate(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
 
-class OutfitTemplateCategoriesSub(Base):
-    __tablename__ = "outfit_template_categories_sub"
+class OutfitTemplateParameter(Base):
+    __tablename__ = "outfit_template_parameters"
 
     outfit_template_id = Column(Integer, ForeignKey("outfit_templates.id"), primary_key=True, nullable=False)
     category_sub_id = Column(Integer, ForeignKey("categories_sub.id"), primary_key=True, nullable=False)

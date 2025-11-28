@@ -72,7 +72,7 @@ def initialize_outfit_templates(target, connection, **kw):
 
     # 2. Prepare tables for insertion
     outfit_template_table = models.OutfitTemplate.__table__
-    link_table = models.OutfitTemplateCategoriesSub.__table__
+    link_table = models.OutfitTemplateParameter.__table__
 
     # 3. Iterate through vectors and insert
     for item in OUTFIT_VECTORS:

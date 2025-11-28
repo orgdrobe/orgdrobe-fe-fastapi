@@ -44,7 +44,7 @@ if SEED_DATA == "yes":
     event.listen(models.Season.__table__, 'after_create', initialize_table)
     event.listen(models.Usage.__table__, 'after_create', initialize_table)
     event.listen(models.MLMapping.__table__, 'after_create', initialize_ml_mapping_table)
-    event.listen(models.OutfitTemplateCategoriesSub.__table__, 'after_create', initialize_outfit_templates)
+    event.listen(models.OutfitTemplateParameter.__table__, 'after_create', initialize_outfit_templates)
 
 
 models.Base.metadata.create_all(bind=engine) # Create the tables

@@ -178,3 +178,15 @@ class UsageResponse(BaseModel):
     description: str | None = Field(default=None,  min_length=1)
     created_at: datetime
     updated_at: datetime
+
+class OutfitTemplateResponse(BaseModel):
+    id: int
+    name: str | None = Field(default=None,  min_length=1)
+    description: str | None = Field(default=None,  min_length=1)
+    created_at: datetime
+    updated_at: datetime
+    
+class OutfitTemplateParameterResponse(BaseModel):
+    outfit_template_id: int | None = Field(default=None)
+    category_sub_id: int | None = Field(default=None)
+    created_at: datetime

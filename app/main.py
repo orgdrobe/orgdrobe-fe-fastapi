@@ -8,7 +8,7 @@ from typing import Annotated
 from .config import config
 from .database import engine, get_db
 from . import models
-from .routers import user, garment, auth, outfit, image, gender, category, garment_type, color, season, usage
+from .routers import user, garment, auth, outfit, image, gender, category, garment_type, color, season, usage, outfit_template
 from .seed_data import initialize_table, initialize_ml_mapping_table, initialize_outfit_templates
 
 SEED_DATA = config["SEED_DATA"]
@@ -62,6 +62,8 @@ app.include_router(garment.router)
 app.include_router(outfit.router)
 app.include_router(user.router)
 app.include_router(auth.router)
+
+app.include_router(outfit_template.router)
 
 app.include_router(gender.router)
 app.include_router(category.router)

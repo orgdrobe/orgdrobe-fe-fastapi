@@ -171,7 +171,7 @@ class MLMapping(Base):
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 class OutfitTemplate(Base):
-    __tablename__ = "outfit_template"
+    __tablename__ = "outfit_templates"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
@@ -183,7 +183,7 @@ class OutfitTemplate(Base):
 class OutfitTemplateCategoriesSub(Base):
     __tablename__ = "outfit_template_categories_sub"
 
-    outfit_template_id = Column(Integer, ForeignKey("outfit_template.id"), primary_key=True, nullable=False)
+    outfit_template_id = Column(Integer, ForeignKey("outfit_templates.id"), primary_key=True, nullable=False)
     category_sub_id = Column(Integer, ForeignKey("categories_sub.id"), primary_key=True, nullable=False)
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))

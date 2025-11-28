@@ -153,7 +153,7 @@ class Usage(Base):
 
 
 class MLMapping(Base):
-    __tablename__ = "ml_mapping"
+    __tablename__ = "ml_mappings"
     
     id = Column(Integer, primary_key=True, index=True)
     ml_category_id = Column(Integer, nullable=False)

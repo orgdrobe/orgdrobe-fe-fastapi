@@ -190,3 +190,7 @@ class OutfitTemplateParameterResponse(BaseModel):
     outfit_template_id: int | None = Field(default=None)
     category_sub_id: int | None = Field(default=None)
     created_at: datetime
+
+class CreateRandomOutfitParams(BaseModel):
+    category_sub_ids: list[int]
+    gender_ids: list[int] | None = Field(default=None)

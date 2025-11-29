@@ -27,6 +27,35 @@ async def list_outfits(db: db_dependency, current_user: models.User = Depends(oa
     garments = db.query(models.Outfit).filter(models.Outfit.user_id == current_user.id).all()
     return garments
 
+@router.post(
+    "/generate/random/garments", 
+    response_model=list[schemas.GarmentResponse]
+)
+async def create_random_garments_for_outfit(
+    params: schemas.CreateRandomOutfitParams, 
+    db: db_dependency, 
+    current_user: models.User = Depends(oauth2.get_current_user)
+) -> list[schemas.GarmentResponse]:
+    
+    garments: list[schemas.GarmentResponse] = []
+    
+    for sub_category_id in params.category_sub_ids:
+            
+        query = db.query(models.Garment).filter(
+            models.Garment.user_id == current_user.id,
+            models.Garment.category_sub_id == sub_category_id
+        )
+
+        if params.gender_ids is not None and len(params.gender_ids) > 0:
+            query = query.filter(models.Garment.gender_id.in_(params.gender_ids))
+
+        random_garment = query.order_by(func.random()).first() # func.random() works for PostgreSQL and SQLite. for MySQL use func.rand()
+
+        if random_garment:
+            garments.append(random_garment)
+
+    return garments
+
 @router.get("/{id}", response_model=schemas.OutfitResponse)
 async def read_outfit(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     try:

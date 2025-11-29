@@ -187,8 +187,8 @@ class OutfitTemplateResponse(BaseModel):
     updated_at: datetime
     
 class OutfitTemplateParameterResponse(BaseModel):
-    outfit_template_id: int | None = Field(default=None)
-    category_sub_id: int | None = Field(default=None)
+    outfit_template_id: int
+    category_sub_id: int
     created_at: datetime
 
 class CreateRandomOutfitParams(BaseModel):

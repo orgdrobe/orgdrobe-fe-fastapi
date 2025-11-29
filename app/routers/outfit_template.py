@@ -10,8 +10,8 @@ from .. import models, schemas, utils, oauth2
 db_dependency = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(
-    tags=["outfit_templates"],
-    prefix="/outfit_templates"
+    tags=["outfit-templates"],
+    prefix="/outfit-templates"
 )
 
 @router.get(

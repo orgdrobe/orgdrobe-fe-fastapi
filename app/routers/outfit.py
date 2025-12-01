@@ -49,6 +49,18 @@ async def create_random_garments_for_outfit(
         if params.gender_ids is not None and len(params.gender_ids) > 0:
             query = query.filter(models.Garment.gender_id.in_(params.gender_ids))
 
+        if params.season_ids:
+            query = query.filter(models.Garment.season_id.in_(params.season_ids))
+
+        if params.usage_ids:
+            query = query.filter(models.Garment.usage_id.in_(params.usage_ids))
+
+        if params.color_ids:
+            query = query.filter(models.Garment.color_id.in_(params.color_ids))
+
+        if params.garment_type_ids:
+            query = query.filter(models.Garment.garment_type_id.in_(params.garment_type_ids))
+
         random_garment = query.order_by(func.random()).first() # func.random() works for PostgreSQL and SQLite. for MySQL use func.rand()
 
         if random_garment:

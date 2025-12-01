@@ -66,6 +66,39 @@ async def get_garments_count(db: db_dependency, current_user: models.User = Depe
     garment_count = db.query(models.Garment).filter(models.Garment.user_id == current_user.id).count()
     return garment_count
 
+@router.post(
+    "/filter",
+    response_model=list[schemas.GarmentResponse])
+async def filter_garments(
+    params: schemas.FilterGarmentsByParams,
+    db: db_dependency,
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    query = db.query(models.Garment).filter(models.Garment.user_id == current_user.id)
+
+    if params.gender_ids:
+        query = query.filter(models.Garment.gender_id.in_(params.gender_ids))
+        
+    if params.category_master_ids:
+        query = query.filter(models.Garment.category_master_id.in_(params.category_master_ids))
+        
+    if params.category_sub_ids:
+        query = query.filter(models.Garment.category_sub_id.in_(params.category_sub_ids))
+        
+    if params.season_ids:
+        query = query.filter(models.Garment.season_id.in_(params.season_ids))
+        
+    if params.usage_ids:
+        query = query.filter(models.Garment.usage_id.in_(params.usage_ids))
+        
+    if params.color_ids:
+        query = query.filter(models.Garment.color_id.in_(params.color_ids))
+        
+    if params.garment_type_ids:
+        query = query.filter(models.Garment.garment_type_id.in_(params.garment_type_ids))
+
+    return query.all()
+
 @router.get("/", response_model=list[schemas.GarmentResponse])
 async def list_garments(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):
     garment_list = db.query(models.Garment).filter(models.Garment.user_id == current_user.id).all()

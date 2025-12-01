@@ -198,3 +198,12 @@ class CreateRandomOutfitParams(BaseModel):
     usage_ids: list[int] | None = Field(default=None)
     color_ids: list[int] | None = Field(default=None)
     garment_type_ids: list[int] | None = Field(default=None)
+
+class FilterGarmentsByParams(BaseModel):
+    gender_ids: list[int] | None = Field(default=None)
+    category_master_ids: list[int] | None = Field(default=None)
+    category_sub_ids: list[int] | None = Field(default=None)
+    season_ids: list[int] | None = Field(default=None)
+    usage_ids: list[int] | None = Field(default=None)
+    color_ids: list[int] | None = Field(default=None)
+    garment_type_ids: list[int] | None = Field(default=None)

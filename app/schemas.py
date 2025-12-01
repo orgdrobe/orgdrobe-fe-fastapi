@@ -194,3 +194,7 @@ class OutfitTemplateParameterResponse(BaseModel):
 class CreateRandomOutfitParams(BaseModel):
     category_sub_ids: list[int]
     gender_ids: list[int] | None = Field(default=None)
+    season_ids: list[int] | None = Field(default=None)
+    usage_ids: list[int] | None = Field(default=None)
+    color_ids: list[int] | None = Field(default=None)
+    garment_type_ids: list[int] | None = Field(default=None)

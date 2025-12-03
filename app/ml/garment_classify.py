@@ -13,6 +13,9 @@ from ..models import MLMapping
 PATH_FILES_STORAGE = config["PATH_FILES_STORAGE"]
 PATH_FILES_STORAGE_ML_SUBDIR = config["PATH_FILES_STORAGE_ML_SUBDIR"]
 
+if not os.path.exists(PATH_FILES_STORAGE_ML_SUBDIR):
+    os.makedirs(os.path.join(PATH_FILES_STORAGE, PATH_FILES_STORAGE_ML_SUBDIR))
+
 MODEL_PATH = os.path.join(PATH_FILES_STORAGE, PATH_FILES_STORAGE_ML_SUBDIR, 'multi_head_fashion_classifier_with_augmentation(big).keras')
 LABEL_INFO_PATH = os.path.join(PATH_FILES_STORAGE, PATH_FILES_STORAGE_ML_SUBDIR, 'label_info_with_augmentation(big).pkl')
 

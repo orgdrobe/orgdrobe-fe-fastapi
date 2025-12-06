@@ -59,6 +59,11 @@ OUTFIT_VECTORS = [
         "vector": [1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0],
         "name": "Winter Outfit",
         "description": "Topwear, Shoes, Bottomwear, Socks, Headwear, Scarves, Gloves"
+    },
+        {
+        "vector": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        "name": "All",
+        "description": "Include all main sub categories"
     }
 ]
 

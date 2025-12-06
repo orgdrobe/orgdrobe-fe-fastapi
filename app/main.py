@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends 
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import event
+from sqlalchemy import event, text
 from sqlalchemy.orm import Session
 from typing import Annotated
 
@@ -46,6 +46,12 @@ if SEED_DATA == "yes":
     event.listen(models.MLMapping.__table__, 'after_create', initialize_ml_mapping_table)
     event.listen(models.OutfitTemplateParameter.__table__, 'after_create', initialize_outfit_templates)
 
+try:
+    with engine.connect() as connection:
+        connection.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+        connection.commit()
+except Exception as e:
+    print(f" Failed to enable pgvector: {e}")
 
 models.Base.metadata.create_all(bind=engine) # Create the tables
 

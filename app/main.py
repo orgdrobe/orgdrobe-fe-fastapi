@@ -55,8 +55,6 @@ except Exception as e:
 
 models.Base.metadata.create_all(bind=engine) # Create the tables
 
-db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
-
 # FastAPI routes
 
 @app.get("/")

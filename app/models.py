@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import Column, ForeignKey, Integer, String, TIMESTAMP, text, CheckConstraint
 from sqlalchemy.orm import Mapped
+from pgvector.sqlalchemy import Vector
 
 from .database import Base
 
@@ -187,3 +188,14 @@ class OutfitTemplateParameter(Base):
     category_sub_id = Column(Integer, ForeignKey("categories_sub.id"), primary_key=True, nullable=False)
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
+class GarmentEmbeddings(Base):
+    __tablename__ = "garment_embeddings"
+    garment_id = Column(Integer, ForeignKey('garments.id'), primary_key=True, nullable=False)
+
+    embedding_image = Column(Vector) 
+    embedding_metadata = Column(Vector) 
+    embedding_combined = Column(Vector)
+
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))

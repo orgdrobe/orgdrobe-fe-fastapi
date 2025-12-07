@@ -223,5 +223,5 @@ class GarmentEmbeddingsCheckResponse(BaseModel):
 class AutocompleteOutfitParams(BaseModel):
     garment_ids: list[int]
     outfit_template_id: int
-    user_gender_ids: list[int] | None = Field(default=None)
+    gender_ids: list[int] | None = Field(default=None)
     variety_coef: float = Field(default=0.05, ge=0, le=1)

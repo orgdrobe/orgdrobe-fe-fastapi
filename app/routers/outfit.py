@@ -84,7 +84,7 @@ async def generate_autocomplete_garments(
         user_id=current_user.id,
         garment_ids=params.garment_ids,
         outfit_template_id=params.outfit_template_id,
-        user_gender_ids=params.user_gender_ids,
+        gender_ids=params.gender_ids,
         variety_coef=params.variety_coef
     )
     

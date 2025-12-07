@@ -11,7 +11,7 @@ def autocomplete_outfit(
     user_id: int,
     garment_ids: list[int],
     outfit_template_id: int,
-    user_gender_ids: list[int] | None,
+    gender_ids: list[int] | None,
     variety_coef: float = 0.05
 ) -> list[models.Garment]: 
     # 1. Fetch Input Vectors and their Categories
@@ -72,8 +72,8 @@ def autocomplete_outfit(
             Garment.category_sub_id == target_sub_category_id
         )
 
-        if user_gender_ids:
-            query = query.filter(Garment.gender_id == user_gender_ids)
+        if gender_ids:
+            query = query.filter(Garment.gender_id == gender_ids)
 
         # PGVECTOR SEARCH: Find the single nearest neighbor
         # TODO: can pass a limit param as a variable

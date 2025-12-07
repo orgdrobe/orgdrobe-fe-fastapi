@@ -214,3 +214,8 @@ class GarmentEmbeddingsCreateStatsResponse(BaseModel):
     skipped: int
     failed: int
     errors: list[str]
+
+class GarmentEmbeddingsCheckResponse(BaseModel):
+    total: int
+    processed: int
+    unprocessed: int

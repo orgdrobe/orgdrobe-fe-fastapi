@@ -7,6 +7,7 @@ import base64, binascii
 from ..database import get_db
 from .. import models, schemas, utils, oauth2
 from ..ml.garment_classify import garment_classify
+from ..ml import garment_embeddings
 from app.schemas import GarmentClassify
 
 db_dependency = Annotated[Session, Depends(get_db)] # dependency injection
@@ -59,6 +60,20 @@ async def classify_garment_from_image(
 
     garment_info = garment_classify(image_bytes, db)
     return garment_info
+
+@router.post("/embeddings", response_model=schemas.GarmentEmbeddingsCreateStatsResponse)
+async def create_garment_embeddings(
+    db: db_dependency, 
+    force_rewrite: bool = False,
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    stats = garment_embeddings.process_user_garments_embeddings(
+        user_id=current_user.id,
+        db=db,
+        force_recreate=force_rewrite
+    )
+
+    return stats
 
 @router.get("/count", response_model=int)
 async def get_garments_count(db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)

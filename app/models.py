@@ -159,6 +159,7 @@ class MLMapping(Base):
     id = Column(Integer, primary_key=True, index=True)
     ml_category_id = Column(Integer, nullable=False)
     ml_category_name = Column(String, nullable=False)
+    # model_id = Column(Integer, ForeignKey('ml_models.id'), primary_key=True) #TODO when i wll be adding new models
     
     # each row only uses one FK because im too lasy to create a bunch of tables for each thing
     gender_id = Column(Integer, ForeignKey("genders.id"), nullable=True)
@@ -193,9 +194,19 @@ class GarmentEmbeddings(Base):
     __tablename__ = "garment_embeddings"
     garment_id = Column(Integer, ForeignKey('garments.id'), primary_key=True, nullable=False)
 
+    # model_id = Column(Integer, ForeignKey('ml_models.id'), primary_key=True) #TODO when i wll be adding new models
     embedding_image = Column(Vector) 
     embedding_metadata = Column(Vector) 
     embedding_combined = Column(Vector)
 
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))
+
+#TODO when there will be more models
+# class MLModel(Base):
+#     __tablename__ = "ml_models"
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String)
+#     description = Column(String) #with path and filename (or add these as fields)
+#     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+#     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'), onupdate=lambda: datetime.now(timezone.utc))

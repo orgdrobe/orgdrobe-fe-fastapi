@@ -177,6 +177,10 @@ async def delete_garment(id: int, db: db_dependency, current_user: models.User =
         if garment.user_id != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
+        db.query(models.GarmentEmbeddings).filter(
+            models.GarmentEmbeddings.garment_id == id
+        ).delete()
+        
         db.delete(garment)
         db.commit()
         return {"message": f"Garment {id} deleted successfully"}

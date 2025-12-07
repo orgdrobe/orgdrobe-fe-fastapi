@@ -61,6 +61,29 @@ async def classify_garment_from_image(
     garment_info = garment_classify(image_bytes, db)
     return garment_info
 
+@router.get("/embeddings/check", response_model=schemas.GarmentEmbeddingsCheckResponse)
+async def check_garment_embeddings_status(
+    db: db_dependency,
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+
+    total_garments = db.query(models.Garment).filter(
+        models.Garment.user_id == current_user.id
+    ).count()
+
+    processed_garments = db.query(models.GarmentEmbeddings).join(
+        models.Garment,
+        models.GarmentEmbeddings.garment_id == models.Garment.id
+    ).filter(
+        models.Garment.user_id == current_user.id
+    ).count()
+
+    return {
+        "total": total_garments,
+        "processed": processed_garments,
+        "unprocessed": total_garments - processed_garments
+    }
+
 @router.post("/embeddings", response_model=schemas.GarmentEmbeddingsCreateStatsResponse)
 async def create_garment_embeddings(
     db: db_dependency, 

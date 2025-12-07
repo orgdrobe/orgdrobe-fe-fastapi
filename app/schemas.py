@@ -207,3 +207,10 @@ class FilterGarmentsByParams(BaseModel):
     usage_ids: list[int] | None = Field(default=None)
     color_ids: list[int] | None = Field(default=None)
     garment_type_ids: list[int] | None = Field(default=None)
+
+class GarmentEmbeddingsCreateStatsResponse(BaseModel):
+    total: int
+    processed: int
+    skipped: int
+    failed: int
+    errors: list[str]

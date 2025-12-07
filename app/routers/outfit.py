@@ -6,6 +6,7 @@ from typing import Annotated
 
 from ..database import get_db
 from .. import models, schemas, utils, oauth2
+from ..ml import outfit_autocomplete
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -67,6 +68,27 @@ async def create_random_garments_for_outfit(
             garments.append(random_garment)
 
     return garments
+
+@router.post(
+    "/generate/autocomplete/garments",
+    response_model=list[schemas.GarmentResponse]
+)
+async def generate_autocomplete_garments(
+    params: schemas.AutocompleteOutfitParams,
+    db: db_dependency,
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+
+    recommended_garments = outfit_autocomplete.autocomplete_outfit(
+        db=db,
+        user_id=current_user.id,
+        garment_ids=params.garment_ids,
+        outfit_template_id=params.outfit_template_id,
+        user_gender_ids=params.user_gender_ids,
+        variety_coef=params.variety_coef
+    )
+    
+    return recommended_garments
 
 @router.get("/{id}", response_model=schemas.OutfitResponse)
 async def read_outfit(id: int, db: db_dependency, current_user: models.User = Depends(oauth2.get_current_user)):

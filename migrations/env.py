@@ -1,3 +1,13 @@
+import sys
+import os
+
+# Manually
+# Required for import from src.... like from core.enums
+current_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(current_dir)
+sys.path.insert(0, os.path.join(root_dir, "src"))
+########################################################
+
 import asyncio
 from logging.config import fileConfig
 

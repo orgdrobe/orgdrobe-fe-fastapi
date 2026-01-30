@@ -8,6 +8,8 @@ from .base import ModelBase
 
 if TYPE_CHECKING:
     from models.user_identities import UserIdentities
+    from models.role import Role, UserRole
+    from models.refresh_token import RefreshToken
 
 class User(ModelBase):
     __tablename__ = "users"
@@ -21,6 +23,14 @@ class User(ModelBase):
         back_populates="user", 
         cascade="all, delete-orphan"
     )
+
+    user_roles: Mapped[list["UserRole"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    roles: Mapped[list["Role"]] = relationship(
+        secondary="user_roles",
+        viewonly=True
+    )
+
+    refresh_tokens: Mapped[list["RefreshToken"]] = relationship(back_populates="user")
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text('now()'))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))

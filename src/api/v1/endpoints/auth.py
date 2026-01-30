@@ -6,6 +6,14 @@ from pydantic import BaseModel
 class TempData(BaseModel):
     pass
 
-@router.post("/email", response_model=TempData)
-async def login_email(db: TempData, credentials: TempData):
+@router.post("/register", response_model=TempData)
+async def register(db: TempData, credentials: TempData):
+    return None
+
+@router.post("/login", response_model=TempData)
+async def login(db: TempData, credentials: TempData):
+    return None
+
+@router.post("/google", response_model=TempData)
+async def google(db: TempData, credentials: TempData):
     return None

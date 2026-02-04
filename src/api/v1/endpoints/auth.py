@@ -1,19 +1,24 @@
 from fastapi import APIRouter
 
+from schemas.user import UserRegister, UserOut
+
 router = APIRouter()
 
-from pydantic import BaseModel
-class TempData(BaseModel):
-    pass
 
-@router.post("/register", response_model=TempData)
-async def register(db: TempData, credentials: TempData):
-    return None
+@router.post("/register", response_model=UserOut)
+async def register(payload: UserRegister) -> UserOut:
 
-@router.post("/login", response_model=TempData)
-async def login(db: TempData, credentials: TempData):
-    return None
+    return UserOut()
 
-@router.post("/google", response_model=TempData)
-async def google(db: TempData, credentials: TempData):
-    return None
+# Додай контекст наприклад 
+#class TransactionContext()
+#   def rollback()
+#   def commit()
+
+# @router.post("/login", response_model=TempData)
+# async def login(db: TempData, credentials: TempData):
+#     return None
+
+# @router.post("/google", response_model=TempData)
+# async def google(db: TempData, credentials: TempData):
+#     return None

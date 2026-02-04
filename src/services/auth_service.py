@@ -1,10 +1,10 @@
 
 from schemas.user import UserRegister, UserOut
-from repositories.user_repository import UserRepository
+from services.unit_of_work import UnitOfWorkInterface
 
 class AuthService:
-    def __init__(self, user_repository: UserRepository) -> None:
-        self._user_repository = user_repository 
+    def __init__(self, uow: UnitOfWorkInterface) -> None:
+        self._uow = uow 
 
     def register_user(self, new_user: UserRegister) -> UserOut: 
         return UserOut()

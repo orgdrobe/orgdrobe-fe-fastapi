@@ -1,6 +1,8 @@
 from fastapi import FastAPI
-from api.v1 import router as v1_router
 
+from core.configs.application_config import application_config
+from core.database.database_context import async_session_factory
+from api.v1 import router as v1_router
 
 app = FastAPI()
 
@@ -12,5 +14,9 @@ if __name__ == "__main__":
     import webbrowser
     import uvicorn
 
-    port = 8080
+    port = application_config.PORT
+
+    if application_config.ENV == "DEV":
+        webbrowser.open_new(f"http://localhost:{port}/docs")
+        
     uvicorn.run("main:app", port=port, reload=True)

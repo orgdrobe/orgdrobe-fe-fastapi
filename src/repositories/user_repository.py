@@ -1,15 +1,15 @@
 from typing import Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.user import User
 
 class UserRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    def add_user(self, user: User) -> User:
+    async def add_user(self, user: User) -> User:
         self._session.add(user)
-        self._session.flush()
-        self._session.refresh(user)
+        await self._session.flush()
+        await self._session.refresh(user)
         return user

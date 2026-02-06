@@ -1,13 +1,21 @@
 from fastapi import APIRouter
 
 from schemas.user import UserRegister, UserOut
+from schemas.errors import ErrorResponse
+from core.exceptions.api_exceptions import UsernameAlreadyExists
 
 router = APIRouter()
 
 
-@router.post("/register", response_model=UserOut)
+@router.post("/register", 
+    response_model=UserOut,
+    responses={
+        409: {"model": ErrorResponse, "description": "Username already exist"}
+    }
+)
 async def register(payload: UserRegister) -> UserOut:
-
+        # raise UsernameAlreadyExists("admin")
+        # raise NotImplementedError()
     return UserOut()
 
 # Додай контекст наприклад 

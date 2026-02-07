@@ -1,22 +1,29 @@
-import uuid
 from typing import cast
 
+import structlog
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from asgi_correlation_id import correlation_id
 
 from schemas.errors import ErrorResponse, ErrorContent
 from core.exceptions.api_exceptions import BaseAPIException
 
-
-def get_trace_id(request: Request) -> str:
-    #TODO: move generation request id to Middleware
-    return request.headers.get("X-Request-ID", str(uuid.uuid4()))
-
+logger = structlog.get_logger()
 
 async def base_api_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     exc = cast(BaseAPIException, exc) # need only for mypy
 
-    trace_id = get_trace_id(request)
+    trace_id = correlation_id.get()
+
+    logger.error(
+        "business_exception_occurred",
+        error_code=exc.code,
+        error_message=exc.message,
+        details=exc.details,
+        path=request.url.path,
+        trace_id=trace_id
+    )
+
     content = ErrorResponse(
         error=ErrorContent(
             code=exc.code,
@@ -32,10 +39,16 @@ async def base_api_exception_handler(request: Request, exc: Exception) -> JSONRe
     )
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
-    trace_id = get_trace_id(request)
+    trace_id = correlation_id.get()
     
-    #TODO: change to logger
-    print(f"ERROR [trace_id={trace_id}]: {exc}")
+    logger.error(
+        "global_exception_occurred",
+        error_code="INTERNAL_SERVER_ERROR",
+        error_message="An error has occurred on the server. Please contact support.",
+        details="None",
+        path=request.url.path,
+         trace_id=trace_id
+    )
 
     content = ErrorResponse(
         error=ErrorContent(

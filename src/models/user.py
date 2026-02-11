@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import ModelBase
 
 if TYPE_CHECKING:
-    from models.user_identities import UserIdentities
+    from models.user_identity import UserIdentity
     from models.role import Role, UserRole
     from models.refresh_token import RefreshToken
 
@@ -19,7 +19,7 @@ class User(ModelBase):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     
-    identities: Mapped[list["UserIdentities"]] = relationship(
+    identities: Mapped[list["UserIdentity"]] = relationship(
         back_populates="user", 
         cascade="all, delete-orphan"
     )

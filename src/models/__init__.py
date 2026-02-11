@@ -1,13 +1,13 @@
 from .base import ModelBase
 from .user import User
-from .user_identities import UserIdentities
+from .user_identity import UserIdentity
 from .role import Role, UserRole
 from .refresh_token import RefreshToken
 
 __all__ = [
     "ModelBase",
     "User",
-    "UserIdentities",
+    "UserIdentity",
     "Role", "UserRole",
     "RefreshToken"
 ]

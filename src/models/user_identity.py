@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import ModelBase
 from core.enums.auth_providers import AuthProvider
 
-class UserIdentities(ModelBase):
+class UserIdentity(ModelBase):
     __tablename__ = "user_identities"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

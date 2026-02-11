@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from asgi_correlation_id import correlation_id
 
 from schemas.errors import ErrorResponse, ErrorContent
-from core.exceptions.api_exceptions import BaseAPIException
+from core.exceptions.base_exception import BaseAPIException
 
 logger = structlog.get_logger()
 

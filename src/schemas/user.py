@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 class UserRegister(BaseModel):
     username:str
@@ -7,4 +8,8 @@ class UserRegister(BaseModel):
 
 
 class UserOut(BaseModel):
-    pass
+    id: UUID
+    email: EmailStr
+    is_email_verified: bool
+
+    model_config = ConfigDict(from_attributes=True)

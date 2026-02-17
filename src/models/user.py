@@ -1,15 +1,13 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, text
+from sqlalchemy import String, DateTime, Boolean, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import ModelBase
 
 if TYPE_CHECKING:
-    from models.user_identity import UserIdentity
-    from models.role import Role, UserRole
-    from models.refresh_token import RefreshToken
+    from models import UserIdentity, Role, UserRole, RefreshToken
 
 class User(ModelBase):
     __tablename__ = "users"
@@ -18,7 +16,8 @@ class User(ModelBase):
 
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    
+    is_email_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text('false'))
+
     identities: Mapped[list["UserIdentity"]] = relationship(
         back_populates="user", 
         cascade="all, delete-orphan"

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from models.user_identity import UserIdentity
+from models import UserIdentity
 
 class UserIdentityRepository:
     def __init__(self, session: AsyncSession) -> None:

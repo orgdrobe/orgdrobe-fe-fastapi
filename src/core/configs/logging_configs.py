@@ -23,6 +23,13 @@ def configure_logging():
         processors=[
             add_correlation,
             structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.CallsiteParameterAdder(
+                {
+                    structlog.processors.CallsiteParameter.FILENAME,
+                    structlog.processors.CallsiteParameter.FUNC_NAME,
+                    structlog.processors.CallsiteParameter.LINENO,
+                }
+            ),
             order_keys,
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],

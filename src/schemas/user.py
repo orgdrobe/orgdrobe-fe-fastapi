@@ -1,4 +1,3 @@
-from uuid import UUID
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 class UserRegister(BaseModel):
@@ -8,7 +7,7 @@ class UserRegister(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: UUID
+    id: int
     email: EmailStr
     is_email_verified: bool
 

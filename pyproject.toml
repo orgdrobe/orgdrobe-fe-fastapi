@@ -9,6 +9,12 @@ dependencies = [
     "asgi-correlation-id>=4.3.4",
     "asyncpg>=0.31.0",
     "fastapi[standard]>=0.128.0",
+    "passlib[argon2]>=1.7.4",
     "sqlalchemy>=2.0.45",
     "structlog>=25.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "types-passlib>=1.7.7.20260211",
 ]

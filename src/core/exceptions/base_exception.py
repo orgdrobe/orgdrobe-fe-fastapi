@@ -5,6 +5,7 @@ class BaseAPIException(Exception):
     status_code: int = 500
     code: ErrorCode = ErrorCode.INTERNAL_SERVER_ERROR
     message: str = "An unexpected error occurred."
+    # TODO: add module= auth, 
 
     def __init__(self, message: Optional[str] = None, details: Optional[Any] = None) -> None:
         if message:

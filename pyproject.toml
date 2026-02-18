@@ -10,8 +10,10 @@ dependencies = [
     "asyncpg>=0.31.0",
     "fastapi[standard]>=0.128.0",
     "passlib[argon2]>=1.7.4",
+    "pyjwt[crypto]>=2.11.0",
     "sqlalchemy>=2.0.45",
     "structlog>=25.5.0",
+    "uuid6>=2025.0.1",
 ]
 
 [dependency-groups]

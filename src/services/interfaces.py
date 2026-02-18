@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Type, TypeVar, Self
 
-from schemas.user import UserOut, UserRegister
+from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
 
 R = TypeVar("R")
 
@@ -24,4 +24,7 @@ class UnitOfWorkInterface(ABC):
 
 class AuthServiceInterface(ABC):
     @abstractmethod
-    async def register_user(self, new_user: UserRegister) -> UserOut: ...
+    async def register_user(self, new_user: UserRegister) -> UserRegisterOut: ...
+
+    @abstractmethod
+    async def local_login(self, user_credentials: UserLogin) -> tuple[UserLoginOut, str]: ...

@@ -30,7 +30,6 @@ class InvalidCredentials(BaseAPIException):
     code = ErrorCode.INVALID_CREDENTIALS
     message = "Invalid username or password."
 
-
 # --- Refresh Token Errors ---
 
 class MissingRefreshToken(BaseAPIException):

@@ -6,7 +6,7 @@ class UserRoleRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def add_user_role(self, user_role: UserRole) -> UserRole:
+    async def add(self, user_role: UserRole) -> UserRole:
         self._session.add(user_role)
         await self._session.flush()
         await self._session.refresh(user_role)

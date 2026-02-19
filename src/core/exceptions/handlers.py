@@ -21,7 +21,7 @@ async def base_api_exception_handler(request: Request, exc: Exception) -> JSONRe
         error_message=exc.message,
         details=exc.details,
         path=request.url.path,
-        trace_id=trace_id, # TODO: FIX isn't needed
+        trace_id=trace_id,
         method=request.method,
         status_code=exc.status_code
     )
@@ -37,7 +37,8 @@ async def base_api_exception_handler(request: Request, exc: Exception) -> JSONRe
 
     return JSONResponse(
         status_code=exc.status_code,
-        content=content
+        content=content,
+        headers=exc.headers
     )
 
 async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -49,7 +50,7 @@ async def global_exception_handler(request: Request, exc: Exception) -> JSONResp
         error_message="An error has occurred on the server. Please contact support.",
         details=str(exc),
         path=request.url.path,
-        trace_id=trace_id, # TODO: FIX isn't needed
+        trace_id=trace_id,
         method=request.method
         # TODO: add user id, and role
     )

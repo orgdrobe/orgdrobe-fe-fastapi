@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 class UserRegister(BaseModel):
     username:str
@@ -6,7 +6,7 @@ class UserRegister(BaseModel):
     password: str
 
 class UserLogin(BaseModel):
-    email:str
+    email: str 
     password: str
 
 class UserRegisterOut(BaseModel):

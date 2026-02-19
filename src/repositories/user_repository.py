@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import User
@@ -11,6 +12,11 @@ class UserRepository:
 
     async def get_by_id(self, id: int) -> Optional[User]:
         stmt = select(User).where(User.id == id)
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_id_with_roles(self, id: int) -> Optional[User]:
+        stmt = select(User).where(User.id == id).options(selectinload(User.roles))
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 

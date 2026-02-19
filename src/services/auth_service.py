@@ -79,7 +79,7 @@ class AuthService(AuthServiceInterface):
             for role in user_identity.user.roles:
                 user_roles.append(role.name)
 
-            access_payload = {"sub": user_identity.user.id, "roles": user_roles}
+            access_payload = {"sub": str(user_identity.user.id), "roles": user_roles}
             access_token = self._create_access_token(access_payload, expires_delta=timedelta(minutes=jwt_config.ACCESS_TOKEN_EXPIRE_MINUTES))
 
             jti = self._create_refresh_token_jti()

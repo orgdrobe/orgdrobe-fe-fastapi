@@ -64,22 +64,25 @@ class MissingAccessToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.ACCESS_TOKEN_MISSING
     message = "Missing access token in Authorization header."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class InvalidAccessToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.ACCESS_TOKEN_INVALID
     message = "Invalid access token."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class InvalidAccessPayload(BaseAPIException):
     status_code = 401
     code = ErrorCode.ACCESS_TOKEN_PAYLOAD_INVALID
     message = "Invalid access token payload."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class AccessUserNotFound(BaseAPIException):
     status_code = 401
     code = ErrorCode.ACCESS_USER_NOT_FOUND
     message = "User associated with this token not found."
-
+    headers={"WWW-Authenticate": "Bearer"}
 
 # --- Permissions ---
 

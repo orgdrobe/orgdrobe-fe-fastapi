@@ -35,10 +35,7 @@ async def get_current_user(
     
     async with uow:
         user_repo = uow.get_repo(UserRepository)
-         
-        # TODO: add roles get in repo
         user = await user_repo.get_by_id_with_roles(user_id)
-        
         if user is None:
             raise AccessUserNotFound()
         

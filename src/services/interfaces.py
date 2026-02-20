@@ -28,3 +28,9 @@ class AuthServiceInterface(ABC):
 
     @abstractmethod
     async def local_login(self, user_credentials: UserLogin) -> tuple[UserLoginOut, str]: ...
+
+    @abstractmethod
+    async def refresh_tokens(self, refresh_token: str | None) -> tuple[UserLoginOut, str]: ... 
+
+    @abstractmethod
+    async def logout(self, refresh_token: str | None) -> None: ...

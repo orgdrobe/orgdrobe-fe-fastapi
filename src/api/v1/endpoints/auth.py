@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Response, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Response, Depends, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
 from core.configs.jwt_config import jwt_config
@@ -11,27 +13,36 @@ from models import User
 
 router = APIRouter()
 
-@router.post("/register", 
+@router.post(
+    "/register", 
     response_model=UserRegisterOut,
     status_code=201,
     responses={
         409: {"model": ErrorResponse, "description": "Username already exist"} # TODO: extend for all in method
     }
 )
-async def register(payload: UserRegister, auth_service: AuthServiceInterface = Depends(get_auth_service)) -> UserRegisterOut:
+async def register(
+    payload: UserRegister, 
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)]
+) -> UserRegisterOut:
     result = await auth_service.register_user(payload)
     return result
 
 
 
-@router.post("/login", 
+@router.post(
+    "/login", 
     response_model=UserLoginOut,
     status_code=200,
     responses={
         401: {"model": ErrorResponse, "description": "Invalid username or password."} # TODO: extend for all in method
     }
 )
-async def local_login(response: Response, payload: OAuth2PasswordRequestForm = Depends(), auth_service: AuthServiceInterface = Depends(get_auth_service)) -> UserLoginOut:
+async def local_login(
+    response: Response, 
+    payload: Annotated[OAuth2PasswordRequestForm, Depends()], 
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)]
+) -> UserLoginOut:
     login_result, refresh_token  = await auth_service.local_login(UserLogin(email=payload.username, password=payload.password))
     response.set_cookie(
         key="refresh_token",
@@ -42,6 +53,51 @@ async def local_login(response: Response, payload: OAuth2PasswordRequestForm = D
         max_age=jwt_config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
     )
     return login_result
+
+
+@router.post(
+        "/refresh",
+        response_model = UserLoginOut,
+        status_code = 200,
+        responses = {
+                 
+        }
+)
+async def refresh_tokens(
+    response: Response, 
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
+    refresh_token: Annotated[str | None, Cookie()] = None
+) -> UserLoginOut:
+    login_result, new_refresh_token = await auth_service.refresh_tokens(refresh_token)
+    print(new_refresh_token)
+    response.set_cookie(
+        key="refresh_token",
+        value=new_refresh_token,
+        httponly=True,
+        secure=True, # Dev = False
+        samesite="lax", 
+        max_age=jwt_config.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+    )
+    return login_result
+
+
+@router.post(
+        "/logout",
+        status_code = 204,
+        responses = {}
+)
+async def logout(
+    response: Response, 
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
+    refresh_token: Annotated[str | None, Cookie()] = None
+) -> Response:
+    await auth_service.logout(refresh_token)
+    response = Response(status_code=204)
+    response.delete_cookie(
+        key="refresh_token",
+        httponly=True,
+        samesite="lax")
+    return response
 
 
 # TEST ROUTE

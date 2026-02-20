@@ -36,26 +36,31 @@ class MissingRefreshToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_MISSING
     message = "Missing refresh token cookie."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class InvalidRefreshToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_INVALID
     message = "Invalid refresh token."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class InvalidRefreshPayload(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_PAYLOAD_INVALID
     message = "Invalid refresh payload."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class RefreshTokenRevokedOrExpired(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_EXPIRED
     message = "Refresh token revoked or expired."
+    headers={"WWW-Authenticate": "Bearer"}
 
 class RefreshUserNotFound(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_USER_NOT_FOUND
     message = "User associated with this token no longer exists."
+    headers={"WWW-Authenticate": "Bearer"}
 
 
 # --- Access Token Errors (Dependencies) ---

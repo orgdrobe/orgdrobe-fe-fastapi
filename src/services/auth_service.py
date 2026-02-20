@@ -1,14 +1,16 @@
-from typing import Optional
+from uuid import UUID
+from typing import Optional, Any
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from jwt.exceptions import PyJWTError
 import uuid6
 from passlib.context import CryptContext
 
 from core.enums.roles import Role
 from core.configs.jwt_config import jwt_config 
 from core.enums.auth_providers import AuthProvider
-from core.exceptions.auth_exceptions import UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials
+from core.exceptions.auth_exceptions import UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired
 from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
 from services.interfaces import AuthServiceInterface, UnitOfWorkInterface
 from repositories import UserRepository, RoleRepository, UserRoleRepository, UserIdentityRepository, RefreshTokenRepository
@@ -103,7 +105,73 @@ class AuthService(AuthServiceInterface):
             )
 
         return result, refresh_token
+
+    async def refresh_tokens(self, refresh_token: str | None) -> tuple[UserLoginOut, str]:
+        if refresh_token is None:
+            raise MissingRefreshToken()     
+
+        payload = self._decode_token(refresh_token)
+        if payload is None or payload.get("type") != "refresh":
+            raise InvalidRefreshToken()
         
+        jti = payload.get("jti")
+        if jti is None:
+            raise InvalidRefreshToken()
+        
+        async with self._uow as uow:
+            refresh_token_repository = uow.get_repo(RefreshTokenRepository)
+            
+            rt = await refresh_token_repository.get_by_jti_with_user_and_roles(UUID(jti))
+            if rt is None or rt.revoked or rt.expires_at < datetime.now(timezone.utc):
+                raise RefreshTokenRevokedOrExpired()
+            
+            rt.revoked = True
+            
+            new_jti = self._create_refresh_token_jti()
+            new_rt_payload = self._create_refresh_token_payload(new_jti, expires_delta=timedelta(days=jwt_config.REFRESH_TOKEN_EXPIRE_DAYS))
+
+            new_rt = RefreshToken(
+                jti=new_jti,
+                user_id = rt.user.id,
+                expires_at = new_rt_payload["exp"],
+                created_at = new_rt_payload["iat"]
+            )
+            await refresh_token_repository.add(new_rt)
+
+            new_refresh_token = jwt.encode(new_rt_payload.copy(), jwt_config.SECRET_KEY, algorithm=jwt_config.ALGORITHM)
+
+            user_roles = []
+            for role in rt.user.roles:
+                user_roles.append(role.name)
+
+            new_access_payload = {"sub": str(rt.user.id), "roles": user_roles}
+            new_access_token = self._create_access_token(new_access_payload, expires_delta=timedelta(minutes=jwt_config.ACCESS_TOKEN_EXPIRE_MINUTES))
+
+            await uow.commit()
+            result = UserLoginOut(
+                access_token=new_access_token, 
+                token_type="bearer",
+                expires_in=jwt_config.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            )
+        return result, new_refresh_token
+
+    async def logout(self, refresh_token: str | None) -> None:
+        if not refresh_token:
+            return
+
+        payload = self._decode_token(refresh_token)
+        if not payload or payload.get("type") != "refresh":
+            return
+
+        jti = payload.get("jti")
+        async with self._uow as uow:
+            repo = uow.get_repo(RefreshTokenRepository)
+            rt = await repo.get_by_jti(UUID(jti))
+            
+            if rt and not rt.revoked:
+                rt.revoked = True
+                await uow.commit()
+
 
     def _hash_password(self, password: str) -> str:
         return self._pwd_context.hash(password)
@@ -144,3 +212,10 @@ class AuthService(AuthServiceInterface):
             "iat": now, 
             "type": "refresh"
         }
+    
+    def _decode_token(self, token: str) -> dict[str,Any] | None:
+        try:
+            payload = jwt.decode(token, jwt_config.SECRET_KEY, jwt_config.ALGORITHM)
+            return payload
+        except PyJWTError:
+            return None

@@ -3,18 +3,24 @@ from typing import Optional, Any
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from jwt.exceptions import PyJWTError
 import uuid6
+import structlog
+from jwt.exceptions import PyJWTError
 from passlib.context import CryptContext
 
-from core.enums.roles import Role
+from core.enums.auth_roles import AuthRole
 from core.configs.jwt_config import jwt_config 
 from core.enums.auth_providers import AuthProvider
-from core.exceptions.auth_exceptions import UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired
+from core.exceptions.auth_exceptions import (
+    UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, 
+    MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired,
+    RoleNotFound)
 from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
 from services.interfaces import AuthServiceInterface, UnitOfWorkInterface
 from repositories import UserRepository, RoleRepository, UserRoleRepository, UserIdentityRepository, RefreshTokenRepository
 from models import User, UserIdentity, UserRole, RefreshToken
+
+logger = structlog.get_logger()
 
 class AuthService(AuthServiceInterface):
     def __init__(self, uow: UnitOfWorkInterface, pwd_context: CryptContext) -> None:
@@ -22,6 +28,7 @@ class AuthService(AuthServiceInterface):
         self._pwd_context = pwd_context
 
     async def register_user(self, new_user: UserRegister) -> UserRegisterOut: 
+        logger.info("user_registration_attempt", email=new_user.email, username=new_user.username)
         async with self._uow as uow:
             user_repository = uow.get_repo(UserRepository) 
             user_identity_repository = uow.get_repo(UserIdentityRepository) 
@@ -29,10 +36,12 @@ class AuthService(AuthServiceInterface):
             user_role_repository = uow.get_repo(UserRoleRepository)
 
             if await user_repository.get_by_username(new_user.username):
+                logger.warning("user_registration_failed", reason="username_taken", username=new_user.username)
                 raise UsernameAlreadyExists(new_user.username)
 
             if await user_repository.get_by_email(new_user.email):
-                raise EmailAlreadyExists(new_user.email) # TODO: check message output for security
+                logger.warning("user_registration_failed", reason="email_taken", email=new_user.email)
+                raise EmailAlreadyExists(new_user.email)
         
             user = User(
                 username=new_user.username,
@@ -52,9 +61,10 @@ class AuthService(AuthServiceInterface):
 
             await user_identity_repository.add(user_identity)
             
-            role = await role_repository.get_by_name(Role.User)
+            role = await role_repository.get_by_name(AuthRole.User)
             if role is None:
-                raise Exception() # TODO: change to RoleNotFound
+                logger.error("default_role_not_found", missing_role=AuthRole.User)
+                raise RoleNotFound(AuthRole.User)
 
             user_role = UserRole(
                 user_id=user.id,
@@ -64,10 +74,12 @@ class AuthService(AuthServiceInterface):
             await user_role_repository.add(user_role)
             await uow.commit()
             result = UserRegisterOut.model_validate(user)
-            
+            logger.info("user_registered_successfully", user_id=user.id, email=user.email)
+
         return result
     
     async def local_login(self, user_credentials: UserLogin) -> tuple[UserLoginOut, str]:
+        logger.info("user_login_attempt", email=user_credentials.email)
         async with self._uow as uow:
             user_identity_repository = uow.get_repo(UserIdentityRepository) 
             refresh_token_repository = uow.get_repo(RefreshTokenRepository)
@@ -75,6 +87,7 @@ class AuthService(AuthServiceInterface):
             user_identity = await user_identity_repository.get_by_provider_id_with_user_and_roles(user_credentials.email)
 
             if user_identity is None or not self._verify_password(user_credentials.password, user_identity.password_hash):
+                logger.warning("user_login_failed", reason="invalid_credentials", email=user_credentials.email)
                 raise InvalidCredentials()
             
             user_roles = []
@@ -104,18 +117,23 @@ class AuthService(AuthServiceInterface):
                 expires_in=jwt_config.ACCESS_TOKEN_EXPIRE_MINUTES * 60
             )
 
+            logger.info("user_logged_in_successfully", user_id=user_identity.user.id, rt_jti=jti)
+
         return result, refresh_token
 
     async def refresh_tokens(self, refresh_token: str | None) -> tuple[UserLoginOut, str]:
         if refresh_token is None:
+            logger.warning("token_refresh_failed", reason="missing_token")
             raise MissingRefreshToken()     
 
         payload = self._decode_token(refresh_token)
         if payload is None or payload.get("type") != "refresh":
+            logger.warning("token_refresh_failed", reason="invalid_or_malformed_token")
             raise InvalidRefreshToken()
         
         jti = payload.get("jti")
         if jti is None:
+            logger.warning("token_refresh_failed", reason="missing_jti_in_payload")
             raise InvalidRefreshToken()
         
         async with self._uow as uow:
@@ -123,6 +141,7 @@ class AuthService(AuthServiceInterface):
             
             rt = await refresh_token_repository.get_by_jti_with_user_and_roles(UUID(jti))
             if rt is None or rt.revoked or rt.expires_at < datetime.now(timezone.utc):
+                logger.warning("token_refresh_failed", reason="revoked_or_expired", jti=jti)
                 raise RefreshTokenRevokedOrExpired()
             
             rt.revoked = True
@@ -153,14 +172,19 @@ class AuthService(AuthServiceInterface):
                 token_type="bearer",
                 expires_in=jwt_config.ACCESS_TOKEN_EXPIRE_MINUTES * 60
             )
+
+            logger.info("tokens_refreshed_successfully", old_jti=jti, new_jti=new_jti)
+
         return result, new_refresh_token
 
     async def logout(self, refresh_token: str | None) -> None:
         if not refresh_token:
+            logger.debug("logout_aborted", reason="no_token_provided")
             return
 
         payload = self._decode_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
+            logger.warning("logout_failed", reason="invalid_token_format")
             return
 
         jti = payload.get("jti")
@@ -171,6 +195,9 @@ class AuthService(AuthServiceInterface):
             if rt and not rt.revoked:
                 rt.revoked = True
                 await uow.commit()
+                logger.info("user_logged_out", jti=jti)
+            else:
+                logger.debug("logout_skipped", reason="token_already_revoked_or_not_found", jti=jti)
 
 
     def _hash_password(self, password: str) -> str:

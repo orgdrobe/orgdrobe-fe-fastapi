@@ -25,3 +25,4 @@ class ErrorCode(StrEnum):
 
     # --- Permissions ---
     INSUFFICIENT_PERMISSIONS = "INSUFFICIENT_PERMISSIONS"
+    ROLE_NOT_FOUND = "ROLE_NOT_FOUND"

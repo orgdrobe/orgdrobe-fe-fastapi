@@ -42,7 +42,9 @@ class InvalidRefreshToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_INVALID
     message = "Invalid refresh token."
-    headers={"WWW-Authenticate": "Bearer"}
+    headers = {
+        "WWW-Authenticate": 'Bearer error="invalid_token", error_description="The signature is invalid"'
+    }
 
 class InvalidRefreshPayload(BaseAPIException):
     status_code = 401
@@ -54,7 +56,9 @@ class RefreshTokenRevokedOrExpired(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_EXPIRED
     message = "Refresh token revoked or expired."
-    headers={"WWW-Authenticate": "Bearer"}
+    headers = {
+        "WWW-Authenticate": 'Bearer error="invalid_token", error_description="The refresh token has expired or was revoked"'
+    }
 
 class RefreshUserNotFound(BaseAPIException):
     status_code = 401
@@ -95,3 +99,11 @@ class InsufficientRole(BaseAPIException):
     status_code = 403
     code = ErrorCode.INSUFFICIENT_PERMISSIONS
     message = "You do not have the required role to perform this action."
+
+class RoleNotFound(BaseAPIException):
+    status_code = 404
+    code = ErrorCode.INSUFFICIENT_PERMISSIONS
+    def __init__(self, role: str):
+        super().__init__(
+            message=f"Role '{role}' not found."
+        )

@@ -18,7 +18,8 @@ router = APIRouter()
     response_model=UserRegisterOut,
     status_code=201,
     responses={
-        409: {"model": ErrorResponse, "description": "Username already exist"} # TODO: extend for all in method
+        409: {"model": ErrorResponse, "description": "Username or email already exist"},
+        404: {"model": ErrorResponse, "description": "User role not found"},
     }
 )
 async def register(
@@ -35,7 +36,8 @@ async def register(
     response_model=UserLoginOut,
     status_code=200,
     responses={
-        401: {"model": ErrorResponse, "description": "Invalid username or password."} # TODO: extend for all in method
+        401: {"model": ErrorResponse, "description": "Invalid username or password."}
+
     }
 )
 async def local_login(
@@ -60,7 +62,7 @@ async def local_login(
         response_model = UserLoginOut,
         status_code = 200,
         responses = {
-                 
+                 401: {"model": ErrorResponse, "description": "Authentication errors during token refresh"}
         }
 )
 async def refresh_tokens(

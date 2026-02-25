@@ -1,5 +1,6 @@
 import asyncio
 
+import typer 
 import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +13,8 @@ from core.enums.auth_providers import AuthProvider
 from core.database.database_context import async_session_factory
 from models import Role, User, UserIdentity, UserRole
 
+
+cli = typer.Typer()
 
 configure_logging()
 structlog.contextvars.clear_contextvars()
@@ -48,7 +51,6 @@ async def seed_roles(session: AsyncSession) -> list[Role]:
             log.info("role_already_exists", status="skipped")
             
     return resulting_roles
-
 
 async def create_first_superuser(session: AsyncSession, roles: list[Role]) -> None:
     username = superuser_config.SUPERUSER_USERNAME
@@ -95,8 +97,7 @@ async def create_first_superuser(session: AsyncSession, roles: list[Role]) -> No
     else:
         log.info("superuser_already_exists", status="skipped")
         
-
-async def main() -> None:
+async def run_seed_process() -> None:
     logger.info("starting_seeding_process")
     
     async with async_session_factory() as session:
@@ -110,8 +111,24 @@ async def main() -> None:
         except Exception as e:
             await session.rollback()
             logger.exception("seeding_process_failed", error=str(e))
-            raise 
+            raise
+
+
+
+@cli.command(name="all")
+def seed_all() -> None:
+    """
+    Запускає процес наповнення бази даних ВСІМА початковими даними (ролі, суперюзер).
+    """
+    asyncio.run(run_seed_process())
+
+@cli.command(name="roles")
+def seed_all_roles() -> None:
+    """
+    Запускає процес наповнення бази даних ролями.
+    """
+    asyncio.run(run_seed_process())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    cli()

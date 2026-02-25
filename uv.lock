@@ -160,6 +160,7 @@ dependencies = [
     { name = "pyjwt", extra = ["crypto"] },
     { name = "sqlalchemy" },
     { name = "structlog" },
+    { name = "typer" },
     { name = "uuid6" },
 ]
 
@@ -178,6 +179,7 @@ requires-dist = [
     { name = "pyjwt", extras = ["crypto"], specifier = ">=2.11.0" },
     { name = "sqlalchemy", specifier = ">=2.0.45" },
     { name = "structlog", specifier = ">=25.5.0" },
+    { name = "typer", specifier = ">=0.21.1" },
     { name = "uuid6", specifier = ">=2025.0.1" },
 ]
 

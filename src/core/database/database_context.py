@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
-from core.configs.database_config import database_config
+from core.configs import database_config
 
 def build_database_uri() -> str:
     return f"{database_config.DIALECT_DRIVER}://{database_config.USERNAME}:{database_config.PASSWORD}@{database_config.HOST}:{database_config.PORT}/{database_config.NAME_OR_PATH}"

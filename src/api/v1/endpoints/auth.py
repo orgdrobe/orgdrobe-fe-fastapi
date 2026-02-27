@@ -3,11 +3,10 @@ from typing import Annotated
 from fastapi import APIRouter, Response, Depends, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.configs.jwt_config import jwt_config
-from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
+from core.configs import jwt_config
 from schemas.errors import ErrorResponse
-from dependencies.auth_service import get_auth_service
-from dependencies.security import get_current_user, require_role
+from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
+from dependencies import get_auth_service, get_current_user,require_role
 from services.interfaces import AuthServiceInterface
 from models import User
 

@@ -1,4 +1,4 @@
-from core.enums.error_codes import ErrorCode
+from core.enums import ErrorCode
 from core.exceptions.base_exception import BaseAPIException
 
 # --- Registration & Login ---

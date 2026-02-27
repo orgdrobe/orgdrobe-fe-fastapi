@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from repositories.interfaces import UserRoleRepositoryInterface
 from models import UserRole 
 
-class UserRoleRepository:
+class UserRoleRepository(UserRoleRepositoryInterface):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

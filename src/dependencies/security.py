@@ -6,11 +6,13 @@ from jwt.exceptions import PyJWTError
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
-from core.configs.jwt_config import jwt_config
-from core.exceptions.auth_exceptions import MissingAccessToken, InvalidAccessPayload, InvalidAccessToken, AccessUserNotFound, InsufficientRole
-from dependencies.unit_of_work import get_unit_of_work
+from core.configs import jwt_config
+from dependencies import get_unit_of_work
 from services.interfaces import UnitOfWorkInterface
-from repositories import UserRepository
+from repositories.interfaces import UserRepositoryInterface
+from core.exceptions.auth_exceptions import (
+    MissingAccessToken, InvalidAccessPayload, InvalidAccessToken, 
+    AccessUserNotFound, InsufficientRole)
 from models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -35,7 +37,7 @@ async def get_current_user(
         raise InvalidAccessToken()
     
     async with uow:
-        user_repo = uow.get_repo(UserRepository)
+        user_repo = uow.get_repo_by_interface(UserRepositoryInterface)
         user = await user_repo.get_by_id_with_roles(user_id)
         if user is None:
             raise AccessUserNotFound()

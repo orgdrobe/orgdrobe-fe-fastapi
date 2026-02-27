@@ -4,9 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from repositories.interfaces import RefreshTokenRepositoryInterface
 from models import RefreshToken, User
 
-class RefreshTokenRepository:
+class RefreshTokenRepository(RefreshTokenRepositoryInterface):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 

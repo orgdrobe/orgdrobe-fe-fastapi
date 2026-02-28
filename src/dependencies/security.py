@@ -7,7 +7,7 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 
 from core.configs import jwt_config
-from dependencies import get_unit_of_work
+from .unit_of_work import get_unit_of_work
 from services.interfaces import UnitOfWorkInterface
 from repositories.interfaces import UserRepositoryInterface
 from core.exceptions.auth_exceptions import (

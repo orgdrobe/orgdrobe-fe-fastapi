@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from asgi_correlation_id import CorrelationIdMiddleware
 
-from core.configs.application_config import application_config
+from core.configs import application_config, configure_logging
 from core.exceptions.base_exception import BaseAPIException
 from core.exceptions.handlers import base_api_exception_handler, global_exception_handler
-from core.configs.logging_configs import configure_logging
 from api.v1 import router as v1_router
 
 configure_logging()

@@ -1,4 +1,5 @@
 import asyncio
+import functools
 
 import typer 
 import structlog
@@ -25,7 +26,25 @@ structlog.contextvars.bind_contextvars(
 
 logger = structlog.get_logger(__name__)
 
-async def seed_roles(session: AsyncSession) -> list[Role]:
+def db_session(async_session_factory):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            async with async_session_factory() as session:
+                try:
+                    result = await func(session, *args, **kwargs)
+                    await session.commit()
+                    logger.info(f"{func.__name__} completed successfully")
+                    return result
+                except Exception as e:
+                    await session.rollback()
+                    logger.exception(f"{func.__name__} failed", exc_info=e)
+                    raise
+        return wrapper
+    return decorator
+
+
+async def create_or_get_roles(session: AsyncSession) -> list[Role]:
     roles_to_seed = [AuthRole.Admin, AuthRole.User]
     roles_description = ["Administrator", "Common user"]
 
@@ -52,7 +71,7 @@ async def seed_roles(session: AsyncSession) -> list[Role]:
             
     return resulting_roles
 
-async def create_first_superuser(session: AsyncSession, roles: list[Role]) -> None:
+async def create_or_get_first_superuser(session: AsyncSession) -> User:
     username = superuser_config.SUPERUSER_USERNAME
     email = superuser_config.SUPERUSER_EMAIL
     password = superuser_config.SUPERUSER_PASSWORD
@@ -85,6 +104,8 @@ async def create_first_superuser(session: AsyncSession, roles: list[Role]) -> No
         )
         session.add(user_identity) 
 
+        roles = await create_or_get_roles(session)
+
         if roles:
             for role in roles:
                 user_role = UserRole(
@@ -94,40 +115,51 @@ async def create_first_superuser(session: AsyncSession, roles: list[Role]) -> No
                 session.add(user_role)
 
         log.info("superuser_created_successfully", status="success")
+        return user
     else:
         log.info("superuser_already_exists", status="skipped")
-        
-async def run_seed_process() -> None:
-    logger.info("starting_seeding_process")
-    
-    async with async_session_factory() as session:
-        try:
-            roles = await seed_roles(session)
-            await create_first_superuser(session, roles)
-            
-            await session.commit()
-            logger.info("seeding_process_completed_successfully")
-            
-        except Exception as e:
-            await session.rollback()
-            logger.exception("seeding_process_failed", error=str(e))
-            raise
+        return user
 
+        
+
+
+@db_session(async_session_factory)
+async def seeding_all(session: AsyncSession) -> None:
+    logger.info("starting_seeding_process")
+    await create_or_get_roles(session)
+    await create_or_get_first_superuser(session)
+            
+@db_session(async_session_factory)
+async def seeding_roles(session: AsyncSession) -> None:
+    logger.info("starting_seeding_process")
+    await create_or_get_roles(session)
+
+@db_session(async_session_factory)
+async def seeding_first_superuser(session: AsyncSession) -> None:
+    logger.info("starting_seeding_process")
+    await create_or_get_first_superuser(session)
 
 
 @cli.command(name="all")
 def seed_all() -> None:
     """
-    Запускає процес наповнення бази даних ВСІМА початковими даними (ролі, суперюзер).
+    Запускає процес наповнення бази даних ВСІМА початковими даними.
     """
-    asyncio.run(run_seed_process())
+    asyncio.run(seeding_all())
 
 @cli.command(name="roles")
 def seed_all_roles() -> None:
     """
-    Запускає процес наповнення бази даних ролями.
+    Запускає процес наповнення бази даних ТІЛЬКИ ролями.
     """
-    asyncio.run(run_seed_process())
+    asyncio.run(seeding_roles())
+
+@cli.command(name="superuser")
+def seed_first_superuser() -> None:
+    """
+    Запускає процес наповнення бази даних ТІЛЬКИ суперкористувачем та ролями.
+    """
+    asyncio.run(seeding_first_superuser())
 
 
 if __name__ == "__main__":

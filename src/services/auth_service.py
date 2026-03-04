@@ -1,3 +1,4 @@
+import secrets
 from uuid import UUID
 from typing import Optional, Any
 from datetime import datetime, timedelta, timezone
@@ -15,7 +16,7 @@ from core.exceptions.auth_exceptions import (
     MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired,
     RoleNotFound)
 from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
-from services.interfaces import AuthServiceInterface, UnitOfWorkInterface
+from services.interfaces import AuthServiceInterface, UnitOfWorkInterface, CacheServiceInterface
 from repositories.interfaces import (
     UserRepositoryInterface, UserIdentityRepositoryInterface, RoleRepositoryInterface, 
     UserRoleRepositoryInterface, RefreshTokenRepositoryInterface)
@@ -24,8 +25,9 @@ from models import User, UserIdentity, UserRole, RefreshToken
 logger = structlog.get_logger()
 
 class AuthService(AuthServiceInterface):
-    def __init__(self, uow: UnitOfWorkInterface, pwd_context: CryptContext) -> None:
+    def __init__(self, uow: UnitOfWorkInterface, cache_service: CacheServiceInterface, pwd_context: CryptContext) -> None:
         self._uow = uow 
+        self._cache_service = cache_service
         self._pwd_context = pwd_context
 
     async def register_user(self, new_user: UserRegister) -> UserRegisterOut: 
@@ -199,6 +201,18 @@ class AuthService(AuthServiceInterface):
                 logger.info("user_logged_out", jti=jti)
             else:
                 logger.debug("logout_skipped", reason="token_already_revoked_or_not_found", jti=jti)
+
+    async def get_verification_code(self, email: str) -> int:
+        cache_key = f"verify_code:{email}"
+       
+        if await self._cache_service.exists(cache_key):
+            await self._cache_service.delete(cache_key)
+      
+        code = secrets.randbelow(900000) + 100000
+
+        await self._cache_service.set(cache_key, code, ttl="15m")
+        return code
+
 
 
     def _hash_password(self, password: str) -> str:

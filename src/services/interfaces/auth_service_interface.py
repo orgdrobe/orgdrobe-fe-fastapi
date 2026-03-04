@@ -14,3 +14,6 @@ class AuthServiceInterface(ABC):
 
     @abstractmethod
     async def logout(self, refresh_token: str | None) -> None: ...
+
+    @abstractmethod
+    async def get_verification_code(self, email: str) -> int: ...

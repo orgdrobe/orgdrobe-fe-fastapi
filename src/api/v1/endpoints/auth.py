@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Response, Depends, Cookie
+from fastapi import APIRouter, Response, BackgroundTasks, Depends, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
 from core.configs import jwt_config
 from schemas.errors import ErrorResponse
 from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
-from dependencies import get_auth_service, get_current_user,require_role
-from services.interfaces import AuthServiceInterface
+from dependencies import get_auth_service, get_email_service, get_current_user, require_role
+from services.interfaces import AuthServiceInterface, EmailServiceInterface
 from models import User
 
 router = APIRouter()
@@ -23,9 +23,13 @@ router = APIRouter()
 )
 async def register(
     payload: UserRegister, 
-    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)]
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
+    email_service: Annotated[EmailServiceInterface, Depends(get_email_service)],
+    background: BackgroundTasks
 ) -> UserRegisterOut:
     result = await auth_service.register_user(payload)
+    code = await auth_service.get_verification_code(result.email)
+    background.add_task(email_service.send_verification_email, result.email, code)
     return result
 
 

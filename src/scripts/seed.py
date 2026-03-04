@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.security.crypto import pwd_context
 from core.configs.superuser_config import superuser_config
-from core.configs.logging_configs import configure_logging
+from core.configs.logging_config import configure_logging
 from core.enums.auth_roles import AuthRole
 from core.enums.auth_providers import AuthProvider
 from core.database.database_context import async_session_factory

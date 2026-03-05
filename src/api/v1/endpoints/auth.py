@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from core.configs import jwt_config
 from schemas.errors import ErrorResponse
-from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
+from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, ResendVerificationCode, AccountVerification
 from dependencies import get_auth_service, get_email_service, get_current_user, require_role
 from services.interfaces import AuthServiceInterface, EmailServiceInterface
 from models import User
@@ -29,7 +29,8 @@ async def register(
 ) -> UserRegisterOut:
     result = await auth_service.register_user(payload)
     code = await auth_service.get_verification_code(result.email)
-    background.add_task(email_service.send_verification_email, result.email, code)
+    if code is not None:
+        background.add_task(email_service.send_verification_email, result.email, code)
     return result
 
 
@@ -39,8 +40,8 @@ async def register(
     response_model=UserLoginOut,
     status_code=200,
     responses={
-        401: {"model": ErrorResponse, "description": "Invalid username or password."}
-
+        401: {"model": ErrorResponse, "description": "Invalid username or password."},
+        403: {"model": ErrorResponse, "description": "Email not verified."}
     }
 )
 async def local_login(
@@ -103,6 +104,47 @@ async def logout(
         httponly=True,
         samesite="lax")
     return response
+
+
+@router.post(
+        "/activation-codes",
+        status_code = 204,
+        responses = {
+            429: {"model": ErrorResponse, "description": "Attempt limit exceeded"}
+        }
+)
+async def resend_verification_code(
+    response: Response,
+    payload: ResendVerificationCode,
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
+    email_service: Annotated[EmailServiceInterface, Depends(get_email_service)],
+    background: BackgroundTasks
+) -> Response:
+    code = await auth_service.get_verification_code(payload.email)
+    if code is not None:
+        background.add_task(email_service.send_verification_email, payload.email, code)
+    response = Response(status_code=204)
+    return response
+
+
+@router.post(
+        "/verifications",
+        status_code = 204,
+        responses = {
+            400: {"model": ErrorResponse, "description" : "Invalid email or verification code, or the verification code has expired."}
+        }
+)
+async def verify_user(
+    response: Response,
+    payload: AccountVerification,
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)]
+) -> Response:
+    await auth_service.verify_user(payload)
+    response = Response(status_code=204)
+    return response
+
+
+
 
 
 # TEST ROUTE

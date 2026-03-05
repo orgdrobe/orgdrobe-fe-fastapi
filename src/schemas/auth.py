@@ -9,6 +9,13 @@ class UserLogin(BaseModel):
     email: str 
     password: str
 
+class ResendVerificationCode(BaseModel):
+    email: EmailStr
+
+class AccountVerification(BaseModel):
+    email: EmailStr
+    code: str
+
 class UserRegisterOut(BaseModel):
     id: int
     email: EmailStr
@@ -22,3 +29,5 @@ class UserLoginOut(BaseModel):
     token_type: str = "bearer"
 
     model_config = ConfigDict(validate_default=True)
+
+

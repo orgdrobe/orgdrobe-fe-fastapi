@@ -41,3 +41,12 @@ class CacheService(CacheServiceInterface):
 
     async def clear(self):
         await cache.clear()
+
+    async def increment(self, key: str, ttl: int | str | None = None) -> int:
+        full_key = self._build_key(key)
+        new_value = await cache.incr(full_key)
+        
+        if new_value == 1 and ttl:
+            await cache.expire(full_key, timeout=ttl)
+            
+        return new_value

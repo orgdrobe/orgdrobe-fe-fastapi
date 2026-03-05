@@ -25,4 +25,7 @@ class CacheServiceInterface(ABC):
       
     @abstractmethod
     async def clear(self) -> None: ...
+
+    @abstractmethod
+    async def increment(self, key: str, ttl: int | str | None = None) -> int: ...
        

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
+from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, AccountVerification
 
 class AuthServiceInterface(ABC):
     @abstractmethod
@@ -16,4 +16,7 @@ class AuthServiceInterface(ABC):
     async def logout(self, refresh_token: str | None) -> None: ...
 
     @abstractmethod
-    async def get_verification_code(self, email: str) -> int: ...
+    async def get_verification_code(self, email: str) -> str | None: ...
+
+    @abstractmethod
+    async def verify_user(self, user_verification_data: AccountVerification) -> None: ...

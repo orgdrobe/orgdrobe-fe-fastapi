@@ -95,6 +95,16 @@ class AccessUserNotFound(BaseAPIException):
 
 # --- Permissions ---
 
+class EmailNotVerified(BaseAPIException):
+    status_code = 403
+    code = ErrorCode.EMAIL_NOT_VERIFIED
+    message = "Email not verified. Please check your inbox."
+    
+    def __init__(self, email: str):
+        super().__init__(
+            details={"field": "email", "value": email}
+        )
+
 class InsufficientRole(BaseAPIException):
     status_code = 403
     code = ErrorCode.INSUFFICIENT_PERMISSIONS
@@ -107,3 +117,10 @@ class RoleNotFound(BaseAPIException):
         super().__init__(
             message=f"Role '{role}' not found."
         )
+
+# --- Verification ---
+
+class InvalidVerificationAttempt(BaseAPIException):
+    status_code = 400
+    code = ErrorCode.INVALID_VERIFICATION_ATTEMPT
+    message = "Invalid email or verification code, or the verification code has expired."

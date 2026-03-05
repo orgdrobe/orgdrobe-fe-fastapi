@@ -14,8 +14,9 @@ from core.configs import jwt_config
 from core.exceptions.auth_exceptions import (
     UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, 
     MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired,
-    RoleNotFound)
-from schemas.user import UserRegister, UserRegisterOut, UserLogin, UserLoginOut
+    RoleNotFound, InvalidVerificationAttempt, EmailNotVerified)
+from core.exceptions.rate_limit_exceptions import RateLimitExceeded
+from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, AccountVerification
 from services.interfaces import AuthServiceInterface, UnitOfWorkInterface, CacheServiceInterface
 from repositories.interfaces import (
     UserRepositoryInterface, UserIdentityRepositoryInterface, RoleRepositoryInterface, 
@@ -92,7 +93,11 @@ class AuthService(AuthServiceInterface):
             if user_identity is None or not self._verify_password(user_credentials.password, user_identity.password_hash):
                 logger.warning("user_login_failed", reason="invalid_credentials", email=user_credentials.email)
                 raise InvalidCredentials()
-            
+
+            if not user_identity.user.is_email_verified: 
+                logger.warning("user_login_failed", reason="email_not_verified", email=user_credentials.email)
+                raise EmailNotVerified(user_identity.user.email)
+
             user_roles = []
             for role in user_identity.user.roles:
                 user_roles.append(role.name)
@@ -202,16 +207,84 @@ class AuthService(AuthServiceInterface):
             else:
                 logger.debug("logout_skipped", reason="token_already_revoked_or_not_found", jti=jti)
 
-    async def get_verification_code(self, email: str) -> int:
+    async def get_verification_code(self, email: str) -> str | None:
+        logger.info("verification_code_generation_attempt", email=email)
+        limit_key = f"daily_limit:verify_code:{email}"
+
+        attempts = await self._cache_service.get(limit_key)
+        if attempts is not None and int(attempts) >= 3:
+            logger.warning("rate_limit_exceeded", reason="daily_email_limit", email=email)
+            raise RateLimitExceeded()
+
+        async with self._uow as uow:
+            user_repository = uow.get_repo_by_interface(UserRepositoryInterface)
+            user = await user_repository.get_by_email(email)
+
+            if user is None:
+                logger.warning("verification_code_generation_failed", reason="user_not_found", email=email)
+                return None
+
+            if user.is_email_verified:
+                logger.warning("verification_code_generation_failed", reason="already_verified", email=email)
+                return None
+            
         cache_key = f"verify_code:{email}"
        
         if await self._cache_service.exists(cache_key):
             await self._cache_service.delete(cache_key)
       
-        code = secrets.randbelow(900000) + 100000
+        code = str(secrets.randbelow(900000) + 100000)
 
         await self._cache_service.set(cache_key, code, ttl="15m")
+        await self._cache_service.increment(limit_key, ttl="24h")
+
+        logger.info("verification_code_generated_successfully", email=email)
         return code
+
+    async def verify_user(self, user_verification_data: AccountVerification) -> None:
+        email = user_verification_data.email
+        logger.info("user_verification_attempt", email=email)
+        
+        cache_key = f"verify_code:{email}"
+        brute_force_key = f"brute_force:verify_code:{email}"
+
+        original_code = await self._cache_service.get(cache_key)
+        
+        if not original_code:
+            logger.warning("user_verification_failed", reason="code_expired_or_missing", email=email)
+            raise InvalidVerificationAttempt()
+            
+        if not secrets.compare_digest(str(original_code), user_verification_data.code):
+            failed_attempts = await self._cache_service.increment(brute_force_key, ttl="15m")
+            
+            if failed_attempts >= 3:
+                await self._cache_service.delete(cache_key)
+                await self._cache_service.delete(brute_force_key)
+                logger.error("brute_force_detected", reason="max_failed_attempts", email=email)
+                raise InvalidVerificationAttempt()
+            
+            logger.warning("user_verification_failed", reason="invalid_code", email=email)
+            raise InvalidVerificationAttempt()
+
+        async with self._uow as uow:
+            user_repository = uow.get_repo_by_interface(UserRepositoryInterface)     
+
+            user = await user_repository.get_by_email(email)
+            
+            if not user:
+                logger.warning("user_verification_failed", reason="user_not_found", email=email)
+                raise InvalidVerificationAttempt()
+            
+            if user.is_email_verified:
+                logger.info("user_verification_skipped", reason="already_verified", email=email)
+                return 
+            
+            user.is_email_verified = True
+            await uow.commit()
+            
+        await self._cache_service.delete(cache_key)
+        await self._cache_service.delete(brute_force_key)
+        logger.info("user_verified_successfully", email=email, user_id=user.id)
 
 
 

@@ -7,7 +7,7 @@ class EmailService(EmailServiceInterface):
     def __init__(self, connection_config: ConnectionConfig):
         self._fm = FastMail(connection_config)
 
-    async def send_verification_email(self, user_email: str, code: int) -> None:
+    async def send_verification_email(self, user_email: str, code: str) -> None:
         message = MessageSchema(
             subject="Ваш код підтвердження",
             recipients=[NameEmail(name="", email=user_email)],

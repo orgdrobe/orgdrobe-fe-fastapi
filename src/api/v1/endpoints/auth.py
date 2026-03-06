@@ -5,7 +5,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from core.configs import jwt_config
 from schemas.errors import ErrorResponse
-from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, ResendVerificationCode, AccountVerification
+from schemas.auth import (
+    UserRegister, UserRegisterOut, UserLogin, UserLoginOut, 
+    ResendVerificationCode, AccountVerification, ForgotPassword,
+    ResetPassword)
 from dependencies import get_auth_service, get_email_service, get_current_user, require_role
 from services.interfaces import AuthServiceInterface, EmailServiceInterface
 from models import User
@@ -106,8 +109,47 @@ async def logout(
     return response
 
 
+# ATTENTION: Only available for the local provider.
 @router.post(
-        "/activation-codes",
+        "/forgot-password",
+        status_code = 204,
+        responses = {}
+)
+async def forgot_password(
+    response: Response, 
+    payload: ForgotPassword,
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
+    email_service: Annotated[EmailServiceInterface, Depends(get_email_service)],
+    background: BackgroundTasks
+) -> Response:
+    reset_token = await auth_service.forgot_password(payload.email)
+    if reset_token is not None:
+        background.add_task(email_service.send_forgot_password_email, payload.email, reset_token)
+    response = Response(status_code=204)
+    return response
+
+
+# ATTENTION: Only available for the local provider.
+@router.post(
+        "/reset-password",
+        status_code = 204,
+        responses = {
+             401: {"model": ErrorResponse, "description": "Reset token is invalid or erxpired"},
+             404: {"model": ErrorResponse, "description": "User associated with token not found."}
+        }
+)
+async def reset_password(
+    response: Response, 
+    payload: ResetPassword,
+    auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)]
+) -> Response:
+    await auth_service.reset_password(payload.token, payload.password)
+    response = Response(status_code=204)
+    return response
+
+
+@router.post(
+        "/activation-code",
         status_code = 204,
         responses = {
             429: {"model": ErrorResponse, "description": "Attempt limit exceeded"}
@@ -128,7 +170,7 @@ async def resend_verification_code(
 
 
 @router.post(
-        "/verifications",
+        "/verification",
         status_code = 204,
         responses = {
             400: {"model": ErrorResponse, "description" : "Invalid email or verification code, or the verification code has expired."}

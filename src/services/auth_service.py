@@ -14,9 +14,10 @@ from core.configs import jwt_config
 from core.exceptions.auth_exceptions import (
     UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, 
     MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired,
-    RoleNotFound, InvalidVerificationAttempt, EmailNotVerified)
+    RoleNotFound, InvalidVerificationAttempt, EmailNotVerified,
+    InvalidResetToken, ResetUserNotFound)
 from core.exceptions.rate_limit_exceptions import RateLimitExceeded
-from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, AccountVerification
+from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, AccountVerification, ResetPassword
 from services.interfaces import AuthServiceInterface, UnitOfWorkInterface, CacheServiceInterface
 from repositories.interfaces import (
     UserRepositoryInterface, UserIdentityRepositoryInterface, RoleRepositoryInterface, 
@@ -207,28 +208,89 @@ class AuthService(AuthServiceInterface):
             else:
                 logger.debug("logout_skipped", reason="token_already_revoked_or_not_found", jti=jti)
 
-    async def get_verification_code(self, email: str) -> str | None:
-        logger.info("verification_code_generation_attempt", email=email)
-        limit_key = f"daily_limit:verify_code:{email}"
+    async def forgot_password(self, user_email: str) -> str | None:
+        reset_token_key = f"reset_token:{user_email}"
+        logger.info("forgot_password_generation_token_attempt", email=user_email)
+        async with self._uow as uow:
+            user_identity_repository = uow.get_repo_by_interface(UserIdentityRepositoryInterface)
+
+            user_identity = await user_identity_repository.get_by_provider_id(user_email) # for local provider is user email
+
+            if user_identity is None:
+                logger.warning("forgot_password_generation_token_failed", reason="user_not_found", email=user_email)
+                return None
+            
+            reset_payload = {"sub": str(user_identity.user_id)}
+            reset_token = self._create_access_token(reset_payload, expires_delta=timedelta(minutes=jwt_config.RESET_EMAIL_TOKEN_EXPIRE_MINUTES))
+
+            await self._cache_service.set(reset_token_key, reset_token, ttl="15m")
+
+            logger.info("forgot_password_generation_token_successfully", email=user_email)
+
+        return reset_token
+
+    async def reset_password(self, reset_token: str, new_password: str) -> None:
+        logger.info("reset_password_attempt")
+
+        payload = self._decode_token(reset_token)
+        if payload is None:
+            logger.info("reset_password_failed", reason="invalid_or_expired_token")
+            raise InvalidResetToken()
+
+        user_id_str = payload.get("sub")
+            
+        if user_id_str is None:
+            logger.warning("reset_password_failed", reason="missing_sub_in_token")
+            raise InvalidResetToken()
+        
+        user_id = int(user_id_str)
+        hashed_password = self._hash_password(new_password)
+
+        async with self._uow as uow:
+            user_identity_repository = uow.get_repo_by_interface(UserIdentityRepositoryInterface)
+
+            user_identity = await user_identity_repository.get_by_user_id(user_id)
+
+            if user_identity is None:
+                logger.warning("reset_password_failed", reason="user_not_found", user_id=user_id)
+                raise ResetUserNotFound()
+
+            user_email = user_identity.provider_id # for local provider is user email
+            reset_token_key = f"reset_token:{user_email}"
+            token_record_from_cache = await self._cache_service.get(reset_token_key)
+
+            if token_record_from_cache is None or str(token_record_from_cache) != reset_token:
+                logger.info("reset_password_failed", reason="invalid_or_expired_token")
+                raise InvalidResetToken()
+            
+            user_identity.password_hash = hashed_password
+            await uow.commit()
+
+        await self._cache_service.delete(reset_token_key)
+        logger.info("reset_password_successfully", user_id=user_id)
+
+    async def get_verification_code(self, user_email: str) -> str | None:
+        logger.info("verification_code_generation_attempt", email=user_email)
+        limit_key = f"daily_limit:verify_code:{user_email}"
 
         attempts = await self._cache_service.get(limit_key)
         if attempts is not None and int(attempts) >= 3:
-            logger.warning("rate_limit_exceeded", reason="daily_email_limit", email=email)
+            logger.warning("rate_limit_exceeded", reason="daily_email_limit", email=user_email)
             raise RateLimitExceeded()
 
         async with self._uow as uow:
             user_repository = uow.get_repo_by_interface(UserRepositoryInterface)
-            user = await user_repository.get_by_email(email)
+            user = await user_repository.get_by_email(user_email)
 
             if user is None:
-                logger.warning("verification_code_generation_failed", reason="user_not_found", email=email)
+                logger.warning("verification_code_generation_failed", reason="user_not_found", email=user_email)
                 return None
 
             if user.is_email_verified:
-                logger.warning("verification_code_generation_failed", reason="already_verified", email=email)
+                logger.warning("verification_code_generation_failed", reason="already_verified", email=user_email)
                 return None
             
-        cache_key = f"verify_code:{email}"
+        cache_key = f"verify_code:{user_email}"
        
         if await self._cache_service.exists(cache_key):
             await self._cache_service.delete(cache_key)
@@ -238,7 +300,7 @@ class AuthService(AuthServiceInterface):
         await self._cache_service.set(cache_key, code, ttl="15m")
         await self._cache_service.increment(limit_key, ttl="24h")
 
-        logger.info("verification_code_generated_successfully", email=email)
+        logger.info("verification_code_generated_successfully", email=user_email)
         return code
 
     async def verify_user(self, user_verification_data: AccountVerification) -> None:

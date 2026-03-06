@@ -41,16 +41,10 @@ class MissingRefreshToken(BaseAPIException):
 class InvalidRefreshToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.REFRESH_TOKEN_INVALID
-    message = "Invalid refresh token."
+    message = "Refresh token is invalid or expired."
     headers = {
         "WWW-Authenticate": 'Bearer error="invalid_token", error_description="The signature is invalid"'
     }
-
-class InvalidRefreshPayload(BaseAPIException):
-    status_code = 401
-    code = ErrorCode.REFRESH_TOKEN_PAYLOAD_INVALID
-    message = "Invalid refresh payload."
-    headers={"WWW-Authenticate": "Bearer"}
 
 class RefreshTokenRevokedOrExpired(BaseAPIException):
     status_code = 401
@@ -78,18 +72,28 @@ class MissingAccessToken(BaseAPIException):
 class InvalidAccessToken(BaseAPIException):
     status_code = 401
     code = ErrorCode.ACCESS_TOKEN_INVALID
-    message = "Invalid access token."
-    headers={"WWW-Authenticate": "Bearer"}
-
-class InvalidAccessPayload(BaseAPIException):
-    status_code = 401
-    code = ErrorCode.ACCESS_TOKEN_PAYLOAD_INVALID
-    message = "Invalid access token payload."
+    message = "Access token is invalid or expired."
     headers={"WWW-Authenticate": "Bearer"}
 
 class AccessUserNotFound(BaseAPIException):
-    status_code = 401
+    status_code = 404
     code = ErrorCode.ACCESS_USER_NOT_FOUND
+    message = "User associated with this token not found."
+    headers={"WWW-Authenticate": "Bearer"}
+
+# --- Reset Token Errors ---
+
+class InvalidResetToken(BaseAPIException):
+    status_code = 401
+    code = ErrorCode.RESET_TOKEN_INVALID
+    message = "Reset token is invalid or expired."
+    headers = {
+        "WWW-Authenticate": 'Bearer error="invalid_token", error_description="The signature is invalid"'
+    }
+
+class ResetUserNotFound(BaseAPIException):
+    status_code = 404
+    code = ErrorCode.RESET_USER_NOT_FOUND
     message = "User associated with this token not found."
     headers={"WWW-Authenticate": "Bearer"}
 

@@ -9,6 +9,13 @@ class UserLogin(BaseModel):
     email: str 
     password: str
 
+class ForgotPassword(BaseModel):
+    email: EmailStr
+
+class ResetPassword(BaseModel):
+    token: str
+    password: str
+
 class ResendVerificationCode(BaseModel):
     email: EmailStr
 

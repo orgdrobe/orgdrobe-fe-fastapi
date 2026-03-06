@@ -11,7 +11,7 @@ from .unit_of_work import get_unit_of_work
 from services.interfaces import UnitOfWorkInterface
 from repositories.interfaces import UserRepositoryInterface
 from core.exceptions.auth_exceptions import (
-    MissingAccessToken, InvalidAccessPayload, InvalidAccessToken, 
+    MissingAccessToken, InvalidAccessToken, 
     AccessUserNotFound, InsufficientRole)
 from models import User
 
@@ -28,7 +28,7 @@ async def get_current_user(
         
         user_id_str = payload.get("sub")
         if user_id_str is None:
-            raise InvalidAccessPayload()
+            raise InvalidAccessToken()
         
         user_id = int(user_id_str) 
         

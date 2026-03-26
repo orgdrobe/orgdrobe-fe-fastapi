@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from asgi_correlation_id import CorrelationIdMiddleware
+
 
 from core.configs import application_config, configure_logging
 from core.exceptions.base_exception import BaseAPIException
@@ -13,7 +15,18 @@ app = FastAPI()
 app.add_exception_handler(BaseAPIException, base_api_exception_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*", # TODO: move to env
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.add_middleware(CorrelationIdMiddleware)
+
+
 
 app.include_router(v1_router, prefix="/api/v1")
 

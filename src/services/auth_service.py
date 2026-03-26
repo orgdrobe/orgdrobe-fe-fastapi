@@ -216,7 +216,7 @@ class AuthService(AuthServiceInterface):
 
             user_identity = await user_identity_repository.get_by_provider_id(user_email) # for local provider is user email
 
-            if user_identity is None:
+            if user_identity is None or user_identity.provider != AuthProvider.local:
                 logger.warning("forgot_password_generation_token_failed", reason="user_not_found", email=user_email)
                 return None
             
@@ -251,7 +251,7 @@ class AuthService(AuthServiceInterface):
 
             user_identity = await user_identity_repository.get_by_user_id(user_id)
 
-            if user_identity is None:
+            if user_identity is None or user_identity.provider != AuthProvider.local:
                 logger.warning("reset_password_failed", reason="user_not_found", user_id=user_id)
                 raise ResetUserNotFound()
 

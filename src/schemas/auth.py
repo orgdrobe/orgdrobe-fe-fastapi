@@ -1,36 +1,38 @@
-from pydantic import BaseModel, EmailStr, ConfigDict, Field
+from pydantic import EmailStr, ConfigDict, Field
 
-class UserRegister(BaseModel):
+from schemas.base_model import CamelCaseBaseModel
+
+class UserRegister(CamelCaseBaseModel):
     username:str
     email:str
     password: str
 
-class UserLogin(BaseModel):
+class UserLogin(CamelCaseBaseModel):
     email: str 
     password: str
 
-class ForgotPassword(BaseModel):
+class ForgotPassword(CamelCaseBaseModel):
     email: EmailStr
 
-class ResetPassword(BaseModel):
+class ResetPassword(CamelCaseBaseModel):
     token: str
     password: str
 
-class ResendVerificationCode(BaseModel):
+class ResendVerificationCode(CamelCaseBaseModel):
     email: EmailStr
 
-class AccountVerification(BaseModel):
+class AccountVerification(CamelCaseBaseModel):
     email: EmailStr
     code: str
 
-class UserRegisterOut(BaseModel):
+class UserRegisterOut(CamelCaseBaseModel):
     id: int
     email: EmailStr
     is_email_verified: bool
 
     model_config = ConfigDict(from_attributes=True)
 
-class UserLoginOut(BaseModel):
+class UserLoginOut(CamelCaseBaseModel):
     access_token: str = ""
     expires_in: int = -1
     token_type: str = "bearer"

@@ -91,12 +91,6 @@ class InvalidResetToken(BaseAPIException):
         "WWW-Authenticate": 'Bearer error="invalid_token", error_description="The signature is invalid"'
     }
 
-class ResetUserNotFound(BaseAPIException):
-    status_code = 404
-    code = ErrorCode.RESET_USER_NOT_FOUND
-    message = "User associated with this token not found."
-    headers={"WWW-Authenticate": "Bearer"}
-
 # --- Permissions ---
 
 class EmailNotVerified(BaseAPIException):

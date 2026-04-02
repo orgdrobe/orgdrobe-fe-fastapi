@@ -7,7 +7,7 @@ from core.configs import jwt_config
 from schemas.errors import ErrorResponse
 from schemas.auth import (
     UserRegister, UserRegisterOut, UserLogin, UserLoginOut, 
-    ResendVerificationCode, AccountVerification, ForgotPassword,
+    SendVerificationCode, AccountVerification, ForgotPassword,
     ResetPassword)
 from dependencies import get_auth_service, get_email_service, get_current_user, require_role
 from services.interfaces import AuthServiceInterface, EmailServiceInterface
@@ -135,7 +135,6 @@ async def forgot_password(
         status_code = 204,
         responses = {
              401: {"model": ErrorResponse, "description": "Reset token is invalid or erxpired"},
-             404: {"model": ErrorResponse, "description": "User associated with token not found."}
         }
 )
 async def reset_password(
@@ -155,9 +154,9 @@ async def reset_password(
             429: {"model": ErrorResponse, "description": "Attempt limit exceeded"}
         }
 )
-async def resend_verification_code(
+async def send_verification_code(
     response: Response,
-    payload: ResendVerificationCode,
+    payload: SendVerificationCode,
     auth_service: Annotated[AuthServiceInterface, Depends(get_auth_service)],
     email_service: Annotated[EmailServiceInterface, Depends(get_email_service)],
     background: BackgroundTasks

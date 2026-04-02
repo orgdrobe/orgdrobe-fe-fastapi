@@ -23,7 +23,6 @@ class ErrorCode(StrEnum):
 
     # --- Reset Token ---
     RESET_TOKEN_INVALID = "RESET_TOKEN_INVALID"
-    RESET_USER_NOT_FOUND = "RESET_USER_NOT_FOUND"
 
     # --- Permissions ---
     EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED"

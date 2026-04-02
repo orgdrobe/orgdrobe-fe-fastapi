@@ -15,7 +15,7 @@ from core.exceptions.auth_exceptions import (
     UsernameAlreadyExists, EmailAlreadyExists, InvalidCredentials, 
     MissingRefreshToken, InvalidRefreshToken, RefreshTokenRevokedOrExpired,
     RoleNotFound, InvalidVerificationAttempt, EmailNotVerified,
-    InvalidResetToken, ResetUserNotFound)
+    InvalidResetToken)
 from core.exceptions.rate_limit_exceptions import RateLimitExceeded
 from schemas.auth import UserRegister, UserRegisterOut, UserLogin, UserLoginOut, AccountVerification, ResetPassword
 from services.interfaces import AuthServiceInterface, UnitOfWorkInterface, CacheServiceInterface
@@ -253,7 +253,7 @@ class AuthService(AuthServiceInterface):
 
             if user_identity is None or user_identity.provider != AuthProvider.local:
                 logger.warning("reset_password_failed", reason="user_not_found", user_id=user_id)
-                raise ResetUserNotFound()
+                raise InvalidResetToken()
 
             user_email = user_identity.provider_id # for local provider is user email
             reset_token_key = f"reset_token:{user_email}"

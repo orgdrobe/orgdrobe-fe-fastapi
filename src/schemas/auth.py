@@ -18,7 +18,7 @@ class ResetPassword(CamelCaseBaseModel):
     token: str
     password: str
 
-class ResendVerificationCode(CamelCaseBaseModel):
+class SendVerificationCode(CamelCaseBaseModel):
     email: EmailStr
 
 class AccountVerification(CamelCaseBaseModel):

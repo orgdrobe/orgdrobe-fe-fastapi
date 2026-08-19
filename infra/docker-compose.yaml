@@ -9,9 +9,9 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: admin
-      TZ: Europe/Kyiv
+      TZ: UTC
     ports:
-      - "5433:5432"  # формат: host:container
+      - "5432:5432"  # формат: host:container
     volumes:
       - ./pgdata:/var/lib/postgresql
       - ./init:/docker-entrypoint-initdb.d

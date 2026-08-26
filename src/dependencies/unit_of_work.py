@@ -1,9 +1,10 @@
 from core.database.database_context import async_session_factory
 from services import SqlAlchemyUnitOfWork
 from services.interfaces import UnitOfWorkInterface
-from repositories import UserRepository, UserIdentityRepository, UserRoleRepository, RoleRepository, RefreshTokenRepository
+from repositories import (UserRepository, UserIdentityRepository, UserRoleRepository, 
+                          RoleRepository, RefreshTokenRepository, CategoryMasterRepository)
 from repositories.interfaces import (UserIdentityRepositoryInterface, UserRepositoryInterface, RoleRepositoryInterface,
-                                     UserRoleRepositoryInterface, RefreshTokenRepositoryInterface)
+                                     UserRoleRepositoryInterface, RefreshTokenRepositoryInterface, CategoryMasterRepositoryInterface)
 
 
 def get_unit_of_work() -> UnitOfWorkInterface:
@@ -14,6 +15,6 @@ def get_unit_of_work() -> UnitOfWorkInterface:
     unit_of_work.register_factory_by_interface(RoleRepositoryInterface, lambda session: RoleRepository(session))
     unit_of_work.register_factory_by_interface(UserRoleRepositoryInterface, lambda session: UserRoleRepository(session))
     unit_of_work.register_factory_by_interface(RefreshTokenRepositoryInterface, lambda session: RefreshTokenRepository(session))
-
+    unit_of_work.register_factory_by_interface(CategoryMasterRepositoryInterface, lambda session: CategoryMasterRepository(session))
 
     return unit_of_work

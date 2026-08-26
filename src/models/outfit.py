@@ -35,7 +35,7 @@ class OutfitGarment(ModelBase):
     outfit_id: Mapped[int] = mapped_column(ForeignKey("outfits.id", ondelete="CASCADE"), nullable=False, primary_key=True)
     garment_id: Mapped[int] = mapped_column(ForeignKey("garments.id", ondelete="CASCADE"), nullable=False, primary_key=True)
 
-    outfit: Mapped["Color"] = relationship(back_populates="outfit_garments")
+    outfit: Mapped["Outfit"] = relationship(back_populates="outfit_garments")
     garment: Mapped["Garment"] = relationship(back_populates="garment_outfits")
 
 
@@ -48,4 +48,4 @@ class OutfitColor(ModelBase):
     outfit_id: Mapped[int] = mapped_column(ForeignKey("outfits.id", ondelete="CASCADE"), nullable=False, primary_key=True)
 
     color: Mapped["Color"] = relationship(back_populates="color_outfits")
-    outfit: Mapped["Outfit"] = relationship(back_populates="garment_colors")
+    outfit: Mapped["Outfit"] = relationship(back_populates="outfit_colors")

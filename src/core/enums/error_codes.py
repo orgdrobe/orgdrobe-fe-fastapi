@@ -34,3 +34,6 @@ class ErrorCode(StrEnum):
 
     # --- Rate Limits ---
     TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS"
+
+    # --- Category ---
+    CATEGORY_MASTER_NOT_FOUND = "CATEGORY_MASTER_NOT_FOUND"

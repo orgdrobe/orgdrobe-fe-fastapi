@@ -5,4 +5,5 @@ from .master_category_service_interface import MasterCategoryServiceInterface
 from .sub_category_service_interface import SubCategoryServiceInterface
 from .garment_type_service_interface import GarmentTypeServiceInterface
 from .gender_service_interface import GenderServiceInterface
+from .season_service_interface import SeasonServiceInterface
 from .unit_of_work_interface import UnitOfWorkInterface

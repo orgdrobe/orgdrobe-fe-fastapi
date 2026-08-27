@@ -7,4 +7,5 @@ from .category_master_repo_interface import CategoryMasterRepositoryInterface
 from .category_sub_repo_interface import CategorySubRepositoryInterface
 from .garment_type_repo_interface import GarmentTypeRepositoryInterface
 from .gender_repo_interface import GenderRepositoryInterface
+from .season_repo_interface import SeasonRepositoryInterface
 from .generic_repo_interface import GenericRepositoryInterface

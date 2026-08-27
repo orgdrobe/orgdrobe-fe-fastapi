@@ -5,4 +5,5 @@ from .master_category_service import MasterCategoryService
 from .sub_category_service import SubCategoryService
 from .garment_type_service import GarmentTypeService
 from .gender_service import GenderService
+from .season_service import SeasonService
 from .unit_of_work import SqlAlchemyUnitOfWork

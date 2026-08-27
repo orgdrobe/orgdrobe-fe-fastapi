@@ -44,3 +44,6 @@ class ErrorCode(StrEnum):
 
     # --- Gender ---
     GENDER_NOT_FOUND = "GENDER_NOT_FOUND"
+
+    # --- Season ---
+    SEASON_NOT_FOUND = "SEASON_NOT_FOUND"

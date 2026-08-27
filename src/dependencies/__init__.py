@@ -7,4 +7,5 @@ from .master_category_service import get_master_category_service
 from .sub_category_service import get_sub_category_service
 from .garment_type_service import get_garment_type_service
 from .gender_service import get_gender_service
+from .season_service import get_season_service
 from .unit_of_work import get_unit_of_work

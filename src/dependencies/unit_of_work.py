@@ -3,10 +3,12 @@ from services import SqlAlchemyUnitOfWork
 from services.interfaces import UnitOfWorkInterface
 from repositories import (UserRepository, UserIdentityRepository, UserRoleRepository, 
                           RoleRepository, RefreshTokenRepository, CategoryMasterRepository,
-                          CategorySubRepository, GarmentTypeRepository, GenderRepository)
+                          CategorySubRepository, GarmentTypeRepository, GenderRepository,
+                          SeasonRepository)
 from repositories.interfaces import (UserIdentityRepositoryInterface, UserRepositoryInterface, RoleRepositoryInterface,
                                      UserRoleRepositoryInterface, RefreshTokenRepositoryInterface, CategoryMasterRepositoryInterface,
-                                     CategorySubRepositoryInterface, GarmentTypeRepositoryInterface, GenderRepositoryInterface)
+                                     CategorySubRepositoryInterface, GarmentTypeRepositoryInterface, GenderRepositoryInterface,
+                                     SeasonRepositoryInterface)
 
 
 def get_unit_of_work() -> UnitOfWorkInterface:
@@ -21,5 +23,6 @@ def get_unit_of_work() -> UnitOfWorkInterface:
     unit_of_work.register_factory_by_interface(CategorySubRepositoryInterface, lambda session: CategorySubRepository(session))
     unit_of_work.register_factory_by_interface(GarmentTypeRepositoryInterface, lambda session: GarmentTypeRepository(session))
     unit_of_work.register_factory_by_interface(GenderRepositoryInterface, lambda session: GenderRepository(session))
+    unit_of_work.register_factory_by_interface(SeasonRepositoryInterface, lambda session: SeasonRepository(session))
 
     return unit_of_work

@@ -9,4 +9,5 @@ from .garment_type_repo_interface import GarmentTypeRepositoryInterface
 from .gender_repo_interface import GenderRepositoryInterface
 from .season_repo_interface import SeasonRepositoryInterface
 from .usage_repo_interface import UsageRepositoryInterface
+from .color_repo_interface import ColorRepositoryInterface
 from .generic_repo_interface import GenericRepositoryInterface

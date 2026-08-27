@@ -4,11 +4,11 @@ from services.interfaces import UnitOfWorkInterface
 from repositories import (UserRepository, UserIdentityRepository, UserRoleRepository, 
                           RoleRepository, RefreshTokenRepository, CategoryMasterRepository,
                           CategorySubRepository, GarmentTypeRepository, GenderRepository,
-                          SeasonRepository, UsageRepository)
+                          SeasonRepository, UsageRepository, ColorRepository)
 from repositories.interfaces import (UserIdentityRepositoryInterface, UserRepositoryInterface, RoleRepositoryInterface,
                                      UserRoleRepositoryInterface, RefreshTokenRepositoryInterface, CategoryMasterRepositoryInterface,
                                      CategorySubRepositoryInterface, GarmentTypeRepositoryInterface, GenderRepositoryInterface,
-                                     SeasonRepositoryInterface, UsageRepositoryInterface)
+                                     SeasonRepositoryInterface, UsageRepositoryInterface, ColorRepositoryInterface)
 
 
 def get_unit_of_work() -> UnitOfWorkInterface:
@@ -25,5 +25,6 @@ def get_unit_of_work() -> UnitOfWorkInterface:
     unit_of_work.register_factory_by_interface(GenderRepositoryInterface, lambda session: GenderRepository(session))
     unit_of_work.register_factory_by_interface(SeasonRepositoryInterface, lambda session: SeasonRepository(session))
     unit_of_work.register_factory_by_interface(UsageRepositoryInterface, lambda session: UsageRepository(session))
+    unit_of_work.register_factory_by_interface(ColorRepositoryInterface, lambda session: ColorRepository(session))
 
     return unit_of_work

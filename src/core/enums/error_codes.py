@@ -50,3 +50,6 @@ class ErrorCode(StrEnum):
 
     # --- Usage ---
     USAGE_NOT_FOUND = "USAGE_NOT_FOUND"
+
+    # --- Color ---
+    COLOR_NOT_FOUND = "COLOR_NOT_FOUND"

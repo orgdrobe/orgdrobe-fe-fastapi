@@ -7,4 +7,5 @@ from .garment_type_service import GarmentTypeService
 from .gender_service import GenderService
 from .season_service import SeasonService
 from .usage_service import UsageService
+from .color_service import ColorService
 from .unit_of_work import SqlAlchemyUnitOfWork

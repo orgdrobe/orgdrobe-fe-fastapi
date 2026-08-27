@@ -6,7 +6,7 @@ from schemas.category_master import (
     UpdateMasterCategory
 )
 
-class CategoryMasterServiceInterface(ABC):
+class MasterCategoryServiceInterface(ABC):
     @abstractmethod
     async def create(self, new_category_master: NewMasterCategory) -> MasterCategoryOut: ...
     

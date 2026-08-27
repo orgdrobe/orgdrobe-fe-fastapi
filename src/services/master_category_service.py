@@ -2,18 +2,18 @@ import structlog
 
 from core.exceptions.category_exceptions import MasterCategoryNotFound
 from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
-from services.interfaces import UnitOfWorkInterface, CategoryMasterServiceInterface
+from services.interfaces import UnitOfWorkInterface, MasterCategoryServiceInterface
 from repositories.interfaces import CategoryMasterRepositoryInterface
 from models import CategoryMaster
 
 logger = structlog.get_logger()
 
-class CategoryMasterService(CategoryMasterServiceInterface):
+class MasterCategoryService(MasterCategoryServiceInterface):
     def __init__(self, uow: UnitOfWorkInterface) -> None:
         self._uow = uow 
 
     async def create(self, new_category_master: NewMasterCategory) -> MasterCategoryOut:
-        logger.info("creating_category_master", name=new_category_master.name)
+        logger.info("creating_master_category", name=new_category_master.name)
         
         async with self._uow as uow:
             repo = uow.get_repo_by_interface(CategoryMasterRepositoryInterface)
@@ -25,7 +25,7 @@ class CategoryMasterService(CategoryMasterServiceInterface):
             await uow.commit()
             
             result = MasterCategoryOut.model_validate(created_category)
-            logger.info("category_master_created_successfully", category_id=result.id)
+            logger.info("master_category_created_successfully", category_id=result.id)
             
         return result
 
@@ -51,14 +51,14 @@ class CategoryMasterService(CategoryMasterServiceInterface):
         return result
 
     async def update(self, id: int, update_data: UpdateMasterCategory) -> MasterCategoryOut:
-        logger.info("updating_category_master", category_id=id)
+        logger.info("updating_master_category", category_id=id)
         
         async with self._uow as uow:
             repo = uow.get_repo_by_interface(CategoryMasterRepositoryInterface)
             
             category = await repo.get_by_id(id)
             if not category:
-                logger.warning("category_master_update_failed", reason="not_found", category_id=id)
+                logger.warning("master_category_update_failed", reason="not_found", category_id=id)
                 raise MasterCategoryNotFound(id)
                 
             data_dict = update_data.model_dump(exclude_unset=True)
@@ -67,22 +67,22 @@ class CategoryMasterService(CategoryMasterServiceInterface):
             await uow.commit()
             
             result = MasterCategoryOut.model_validate(updated_category)
-            logger.info("category_master_updated_successfully", category_id=result.id)
+            logger.info("master_category_updated_successfully", category_id=result.id)
             
         return result
 
     async def delete(self, id: int) -> bool:
-        logger.info("deleting_category_master", category_id=id)
+        logger.info("deleting_master_category", category_id=id)
         
         async with self._uow as uow:
             repo = uow.get_repo_by_interface(CategoryMasterRepositoryInterface)
             
             is_deleted = await repo.delete(id)
             if not is_deleted:
-                logger.warning("category_master_delete_failed", reason="not_found", category_id=id)
+                logger.warning("master_category_delete_failed", reason="not_found", category_id=id)
                 raise MasterCategoryNotFound(id)
                 
             await uow.commit()
-            logger.info("category_master_deleted_successfully", category_id=id)
+            logger.info("master_category_deleted_successfully", category_id=id)
             
         return True

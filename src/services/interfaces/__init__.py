@@ -1,6 +1,6 @@
 from .auth_service_interface import AuthServiceInterface
 from .email_service_interface import EmailServiceInterface
 from .cache_service_interface import CacheServiceInterface
-from .category_master_service_interface import CategoryMasterServiceInterface
+from .master_category_service_interface import MasterCategoryServiceInterface
 from .sub_category_service_interface import SubCategoryServiceInterface
 from .unit_of_work_interface import UnitOfWorkInterface

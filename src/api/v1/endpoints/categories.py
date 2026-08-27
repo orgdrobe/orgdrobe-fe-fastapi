@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, status
 
 from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
 from schemas.sub_category import NewSubCategory, SubCategoryOut, UpdateSubCategory
-from services.interfaces import CategoryMasterServiceInterface, SubCategoryServiceInterface
+from services.interfaces import MasterCategoryServiceInterface, SubCategoryServiceInterface
 from schemas.errors import ErrorResponse
-from dependencies import get_category_master_service, get_sub_category_service, get_current_user, require_role
+from dependencies import get_master_category_service, get_sub_category_service, get_current_user, require_role
 from models import User
 
 router = APIRouter()
@@ -18,7 +18,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK
 )
 async def master_categories_all(
-    category_service: Annotated[CategoryMasterServiceInterface, Depends(get_category_master_service)],
+    category_service: Annotated[MasterCategoryServiceInterface, Depends(get_master_category_service)],
     current_user: Annotated[User, Depends(get_current_user)],
     skip: int = 0,
     limit: int = 100
@@ -36,7 +36,7 @@ async def master_categories_all(
 )
 async def master_category_by_id(
     id: int, 
-    category_service: Annotated[CategoryMasterServiceInterface, Depends(get_category_master_service)],
+    category_service: Annotated[MasterCategoryServiceInterface, Depends(get_master_category_service)],
     current_user: Annotated[User, Depends(get_current_user)]
 ) -> MasterCategoryOut:
     result = await category_service.get_by_id(id)
@@ -50,7 +50,7 @@ async def master_category_by_id(
 )
 async def create_master_category(
     payload: NewMasterCategory,
-    category_service: Annotated[CategoryMasterServiceInterface, Depends(get_category_master_service)],
+    category_service: Annotated[MasterCategoryServiceInterface, Depends(get_master_category_service)],
     current_user: Annotated[User, Depends(require_role(["admin"]))]
 ) -> MasterCategoryOut:
     return await category_service.create(payload)
@@ -67,7 +67,7 @@ async def create_master_category(
 async def update_master_category(
     id: int,
     payload: UpdateMasterCategory,
-    category_service: Annotated[CategoryMasterServiceInterface, Depends(get_category_master_service)],
+    category_service: Annotated[MasterCategoryServiceInterface, Depends(get_master_category_service)],
     current_user: Annotated[User, Depends(require_role(["admin"]))]
 ) -> MasterCategoryOut:
     return await category_service.update(id, payload)
@@ -82,7 +82,7 @@ async def update_master_category(
 )
 async def delete_master_category(
     id: int,
-    category_service: Annotated[CategoryMasterServiceInterface, Depends(get_category_master_service)],
+    category_service: Annotated[MasterCategoryServiceInterface, Depends(get_master_category_service)],
     current_user: Annotated[User, Depends(require_role(["admin"]))]
 ) -> None:
     await category_service.delete(id)

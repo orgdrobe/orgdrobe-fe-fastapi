@@ -1,6 +1,6 @@
 import structlog
 
-from core.exceptions.category_exceptions import CategoryMasterNotFound
+from core.exceptions.category_exceptions import MasterCategoryNotFound
 from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
 from services.interfaces import UnitOfWorkInterface, CategoryMasterServiceInterface
 from repositories.interfaces import CategoryMasterRepositoryInterface
@@ -35,7 +35,7 @@ class CategoryMasterService(CategoryMasterServiceInterface):
             
             category = await repo.get_by_id(id)
             if category is None:
-                raise CategoryMasterNotFound(id)
+                raise MasterCategoryNotFound(id)
 
             result = MasterCategoryOut.model_validate(category)
             
@@ -59,8 +59,7 @@ class CategoryMasterService(CategoryMasterServiceInterface):
             category = await repo.get_by_id(id)
             if not category:
                 logger.warning("category_master_update_failed", reason="not_found", category_id=id)
-                # TODO: add custom exception
-                raise ValueError(f"Category with id {id} not found")
+                raise MasterCategoryNotFound(id)
                 
             data_dict = update_data.model_dump(exclude_unset=True)
             
@@ -81,7 +80,7 @@ class CategoryMasterService(CategoryMasterServiceInterface):
             is_deleted = await repo.delete(id)
             if not is_deleted:
                 logger.warning("category_master_delete_failed", reason="not_found", category_id=id)
-                raise CategoryMasterNotFound(id)
+                raise MasterCategoryNotFound(id)
                 
             await uow.commit()
             logger.info("category_master_deleted_successfully", category_id=id)

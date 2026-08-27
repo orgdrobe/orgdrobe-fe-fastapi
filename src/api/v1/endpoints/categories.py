@@ -1,12 +1,13 @@
 from fastapi import APIRouter
 
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
-from services.interfaces import CategoryMasterServiceInterface
+from schemas.sub_category import NewSubCategory, SubCategoryOut, UpdateSubCategory
+from services.interfaces import CategoryMasterServiceInterface, SubCategoryServiceInterface
 from schemas.errors import ErrorResponse
-from dependencies import get_category_master_service, get_current_user, require_role
+from dependencies import get_category_master_service, get_sub_category_service, get_current_user, require_role
 from models import User
 
 router = APIRouter()
@@ -30,7 +31,7 @@ async def master_categories_all(
     response_model=MasterCategoryOut,
     status_code=status.HTTP_200_OK,
     responses={
-        404: {"model": ErrorResponse, "description": "Category not found"},
+        404: {"model": ErrorResponse, "description": "Master category not found"},
     }
 )
 async def master_category_by_id(
@@ -39,8 +40,6 @@ async def master_category_by_id(
     current_user: Annotated[User, Depends(get_current_user)]
 ) -> MasterCategoryOut:
     result = await category_service.get_by_id(id)
-    if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     return result
 
 
@@ -62,7 +61,7 @@ async def create_master_category(
     response_model=MasterCategoryOut,
     status_code=status.HTTP_200_OK,
     responses={
-        404: {"model": ErrorResponse, "description": "Category not found"},
+        404: {"model": ErrorResponse, "description": "Master category not found"},
     }
 )
 async def update_master_category(
@@ -78,7 +77,7 @@ async def update_master_category(
     "/master/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
-        404: {"model": ErrorResponse, "description": "Category not found"},
+        404: {"model": ErrorResponse, "description": "Master category not found"},
     }
 )
 async def delete_master_category(
@@ -93,15 +92,77 @@ async def delete_master_category(
 # SUB CATEGORIES
 # ---------------------------------------------------------
 
-@router.get("/sub/", response_model=list[dict])
+@router.get(
+    "/sub/", 
+    response_model=list[SubCategoryOut],
+    status_code=status.HTTP_200_OK
+)
 async def sub_categories_all(
-    current_user: Annotated[User, Depends(get_current_user)]
-):
-    return []
+    category_service: Annotated[SubCategoryServiceInterface, Depends(get_sub_category_service)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    skip: int = 0,
+    limit: int = 100
+) -> list[SubCategoryOut]:
+    return await category_service.get_all(skip=skip, limit=limit)
 
-@router.get("/sub/{id}", response_model=dict)
+
+@router.get(
+    "/sub/{id}", 
+    response_model=SubCategoryOut,
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"model": ErrorResponse, "description": "Sub category not found"},
+    }
+)
 async def sub_category_by_id(
     id: int, 
+    category_service: Annotated[SubCategoryServiceInterface, Depends(get_sub_category_service)],
     current_user: Annotated[User, Depends(get_current_user)]
-):
-    return {}
+) -> SubCategoryOut:
+    result = await category_service.get_by_id(id)
+    return result
+
+
+@router.post(
+    "/sub/",
+    response_model=SubCategoryOut,
+    status_code=status.HTTP_201_CREATED
+)
+async def create_sub_category(
+    payload: NewSubCategory,
+    category_service: Annotated[SubCategoryServiceInterface, Depends(get_sub_category_service)],
+    current_user: Annotated[User, Depends(require_role(["admin"]))]
+) -> SubCategoryOut:
+    return await category_service.create(payload)
+
+
+@router.patch(
+    "/sub/{id}",
+    response_model=SubCategoryOut,
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"model": ErrorResponse, "description": "Sub category not found"},
+    }
+)
+async def update_sub_category(
+    id: int,
+    payload: UpdateSubCategory,
+    category_service: Annotated[SubCategoryServiceInterface, Depends(get_sub_category_service)],
+    current_user: Annotated[User, Depends(require_role(["admin"]))]
+) -> SubCategoryOut:
+    return await category_service.update(id, payload)
+
+
+@router.delete(
+    "/sub/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        404: {"model": ErrorResponse, "description": "Sub category not found"},
+    }
+)
+async def delete_sub_category(
+    id: int,
+    category_service: Annotated[SubCategoryServiceInterface, Depends(get_sub_category_service)],
+    current_user: Annotated[User, Depends(require_role(["admin"]))]
+) -> None:
+    await category_service.delete(id)

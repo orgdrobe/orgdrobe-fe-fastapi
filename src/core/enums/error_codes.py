@@ -41,3 +41,6 @@ class ErrorCode(StrEnum):
 
     # --- Garment Type ---
     GARMENT_TYPE_NOT_FOUND = "GARMENT_TYPE_NOT_FOUND"
+
+    # --- Gender ---
+    GENDER_NOT_FOUND = "GENDER_NOT_FOUND"

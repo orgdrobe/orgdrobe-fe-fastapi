@@ -6,4 +6,5 @@ from .refresh_token_repository import RefreshTokenRepository
 from .category_master_repository import CategoryMasterRepository
 from .category_sub_repository import CategorySubRepository
 from .garment_type_repository import GarmentTypeRepository
+from .gender_repository import GenderRepository
 from .generic_repository import GenericRepository

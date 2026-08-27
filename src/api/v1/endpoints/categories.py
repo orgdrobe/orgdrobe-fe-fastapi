@@ -12,6 +12,7 @@ from models import User
 
 router = APIRouter()
 
+
 @router.get(
     "/master/", 
     response_model=list[MasterCategoryOut],

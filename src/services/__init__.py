@@ -3,4 +3,5 @@ from .email_service import EmailService
 from .cache_service import CacheService
 from .master_category_service import MasterCategoryService
 from .sub_category_service import SubCategoryService
+from .garment_type_service import GarmentTypeService
 from .unit_of_work import SqlAlchemyUnitOfWork

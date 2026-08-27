@@ -38,3 +38,6 @@ class ErrorCode(StrEnum):
     # --- Category ---
     MASTER_CATEGORY_NOT_FOUND = "MASTER_CATEGORY_NOT_FOUND"
     SUB_CATEGORY_NOT_FOUND = "SUB_CATEGORY_NOT_FOUND"
+
+    # --- Garment Type ---
+    GARMENT_TYPE_NOT_FOUND = "GARMENT_TYPE_NOT_FOUND"

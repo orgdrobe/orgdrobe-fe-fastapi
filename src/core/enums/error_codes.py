@@ -47,3 +47,6 @@ class ErrorCode(StrEnum):
 
     # --- Season ---
     SEASON_NOT_FOUND = "SEASON_NOT_FOUND"
+
+    # --- Usage ---
+    USAGE_NOT_FOUND = "USAGE_NOT_FOUND"

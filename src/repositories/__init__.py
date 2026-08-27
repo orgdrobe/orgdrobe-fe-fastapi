@@ -8,4 +8,5 @@ from .category_sub_repository import CategorySubRepository
 from .garment_type_repository import GarmentTypeRepository
 from .gender_repository import GenderRepository
 from .season_repository import SeasonRepository
+from .usage_repository import UsageRepository
 from .generic_repository import GenericRepository

@@ -6,7 +6,6 @@ from schemas.color import (
     UpdateColor
 )
 
-
 class ColorServiceInterface(ABC):
     @abstractmethod
     async def create(self, new_color: NewColor) -> ColorOut: ...

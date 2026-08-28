@@ -9,7 +9,6 @@ from schemas.garment_type import (
 
 class GarmentTypeServiceInterface(ABC):
     @abstractmethod
-    
     async def create(self, new_garment_type: NewGarmentType) -> GarmentTypeOut: ...
     
     @abstractmethod

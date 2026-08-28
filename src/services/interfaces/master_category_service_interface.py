@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from schemas.category_master import (
+from schemas.master_category import (
     NewMasterCategory, 
     MasterCategoryOut, 
     UpdateMasterCategory

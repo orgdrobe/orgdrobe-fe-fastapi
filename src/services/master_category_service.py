@@ -1,7 +1,7 @@
 import structlog
 
 from core.exceptions.category_exceptions import MasterCategoryNotFound
-from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
+from schemas.master_category import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
 from services.interfaces import UnitOfWorkInterface, MasterCategoryServiceInterface
 from repositories.interfaces import CategoryMasterRepositoryInterface
 from models import CategoryMaster

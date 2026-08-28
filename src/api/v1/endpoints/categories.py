@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
-from schemas.category_master import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
+from schemas.master_category import NewMasterCategory, MasterCategoryOut, UpdateMasterCategory
 from schemas.sub_category import NewSubCategory, SubCategoryOut, UpdateSubCategory
 from services.interfaces import MasterCategoryServiceInterface, SubCategoryServiceInterface
 from schemas.errors import ErrorResponse

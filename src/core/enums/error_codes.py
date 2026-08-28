@@ -53,3 +53,6 @@ class ErrorCode(StrEnum):
 
     # --- Color ---
     COLOR_NOT_FOUND = "COLOR_NOT_FOUND"
+
+    # --- Garment ---
+    GARMENT_NOT_FOUND = "GARMENT_NOT_FOUND"

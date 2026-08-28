@@ -10,4 +10,5 @@ from .gender_service import get_gender_service
 from .season_service import get_season_service
 from .usage_service import get_usage_service
 from .color_service import get_color_service
+from .garment_service import get_garment_service
 from .unit_of_work import get_unit_of_work

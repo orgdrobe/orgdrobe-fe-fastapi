@@ -48,16 +48,14 @@ class GarmentRepository(GarmentRepositoryInterface):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
         
-    # async def update(self, garment: Garment, update_data: dict[str, Any]) -> Garment | None:
-    #     stmt = (
-    #         update(Garment)
-    #         .where(Garment.id == garment.id)
-    #         .values(**update_data)
-    #     )
-    #     await self._session.execute(stmt)
-    #     await self._session.flush()
-        
-    #     return await self.get_by_id(garment.id)
+    async def update(self, garment: Garment, update_data: dict[str, Any]) -> Garment | None:
+        for key, value in update_data.items():
+            setattr(garment, key, value)
+
+        self._session.add(garment)
+        await self._session.flush()
+        await self._session.refresh(garment)
+        return garment
         
     async def delete(self, id: int) -> bool:
         stmt = select(Garment).where(Garment.id == id)

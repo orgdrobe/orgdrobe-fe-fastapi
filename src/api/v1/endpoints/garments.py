@@ -48,6 +48,9 @@ async def garment_by_id(
     "/",
     response_model=GarmentOut,
     status_code=status.HTTP_201_CREATED,
+    responses={
+        404: {"model": ErrorResponse, "description": "Referenced entity not found"},
+    }
 )
 async def create_garment(
     payload: NewGarment,
@@ -57,21 +60,21 @@ async def create_garment(
     return await garment_service.create(user_id=current_user.id, new_garment=payload)
 
 
-# @router.patch(
-#     "/{id}",
-#     response_model=GarmentOut,
-#     status_code=status.HTTP_200_OK,
-#     responses={
-#         404: {"model": ErrorResponse, "description": "Garment not found"},
-#     }
-# )
-# async def update_garment(
-#     id: int,
-#     payload: UpdateGarment,
-#     garment_service: Annotated[GarmentServiceInterface, Depends(get_garment_service)],
-#     current_user: Annotated[User, Depends(get_current_user)]
-# ) -> GarmentOut:
-#     return await garment_service.update(user_id=current_user.id, id=id, update_data=payload)
+@router.patch(
+    "/{id}",
+    response_model=GarmentOut,
+    status_code=status.HTTP_200_OK,
+    responses={
+        404: {"model": ErrorResponse, "description": "Garment or referenced entity not found"},
+    }
+)
+async def update_garment(
+    id: int,
+    payload: UpdateGarment,
+    garment_service: Annotated[GarmentServiceInterface, Depends(get_garment_service)],
+    current_user: Annotated[User, Depends(get_current_user)]
+) -> GarmentOut:
+    return await garment_service.update(user_id=current_user.id, id=id, update_data=payload)
 
 
 @router.delete(

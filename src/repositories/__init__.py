@@ -5,6 +5,9 @@ from .identity_repository import UserIdentityRepository
 from .refresh_token_repository import RefreshTokenRepository
 from .garment_repository import GarmentRepository
 from .garment_color_repository import GarmentColorRepository
+from .outfit_repository import OutfitRepository
+from .outfit_garment_repository import OutfitGarmentRepository
+from .outfit_color_repository import OutfitColorRepository
 from .category_master_repository import CategoryMasterRepository
 from .category_sub_repository import CategorySubRepository
 from .garment_type_repository import GarmentTypeRepository

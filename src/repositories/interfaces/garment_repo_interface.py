@@ -6,6 +6,9 @@ from models import Garment
 class GarmentRepositoryInterface(ABC):
     @abstractmethod
     async def get_by_id(self, id: int) -> Garment | None: ...
+
+    @abstractmethod
+    async def get_by_ids_and_user_id(self, ids: Sequence[int], user_id: int) -> Sequence[Garment]: ...
     
     @abstractmethod 
     async def add(self, user: Garment) -> Garment: ...

@@ -20,6 +20,3 @@ class OutfitRepositoryInterface(ABC):
     @abstractmethod
     async def delete(self, id: int) -> bool: ...
 
-    @abstractmethod
-    async def expunge(self, outfit: Outfit) -> None: ...
-

@@ -1,13 +1,21 @@
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 
-from sqlalchemy import String, Text, ForeignKey, DateTime, text, Boolean
+from sqlalchemy import String, Text, ForeignKey, DateTime, text, Boolean, Table, Column
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from .base import ModelBase
 
 if TYPE_CHECKING:
     from models import (User, Color, Garment)
+
+outfit_garments = Table(
+    "outfit_garments",
+    ModelBase.metadata,
+    Column("outfit_id", ForeignKey("outfits.id", ondelete="CASCADE"), primary_key=True),
+    Column("garment_id", ForeignKey("garments.id", ondelete="CASCADE"), primary_key=True),
+)
+
 
 class Outfit(ModelBase):
     __tablename__ = "outfits"
@@ -19,24 +27,20 @@ class Outfit(ModelBase):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user: Mapped["User"] = relationship(back_populates="outfits")
 
-    outfit_garments: Mapped[list["OutfitGarment"]] = relationship(back_populates="outfit", cascade="all, delete-orphan")
-    garments: Mapped[list["Garment"]] = relationship(secondary="outfit_garments", viewonly=True)
+    garments: Mapped[list["Garment"]] = relationship(
+        secondary=outfit_garments,
+        back_populates="outfits",
+        lazy="selectin",
+    )
 
-    outfit_colors: Mapped[list["OutfitColor"]] = relationship(back_populates="outfit", cascade="all, delete-orphan")
-    colors: Mapped[list["Color"]] = relationship(secondary="outfit_colors", viewonly=True)
+    colors: Mapped[list["OutfitColor"]] = relationship(
+        back_populates="outfit",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text('now()'))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=text('now()'), onupdate=text('now()'))
-
-
-class OutfitGarment(ModelBase):
-    __tablename__ = "outfit_garments"
-
-    outfit_id: Mapped[int] = mapped_column(ForeignKey("outfits.id", ondelete="CASCADE"), nullable=False, primary_key=True)
-    garment_id: Mapped[int] = mapped_column(ForeignKey("garments.id", ondelete="CASCADE"), nullable=False, primary_key=True)
-
-    outfit: Mapped["Outfit"] = relationship(back_populates="outfit_garments")
-    garment: Mapped["Garment"] = relationship(back_populates="garment_outfits")
 
 
 class OutfitColor(ModelBase):
@@ -47,5 +51,5 @@ class OutfitColor(ModelBase):
     color_id: Mapped[int] = mapped_column(ForeignKey("colors.id", ondelete="CASCADE"), nullable=False, primary_key=True)
     outfit_id: Mapped[int] = mapped_column(ForeignKey("outfits.id", ondelete="CASCADE"), nullable=False, primary_key=True)
 
-    color: Mapped["Color"] = relationship(back_populates="color_outfits")
-    outfit: Mapped["Outfit"] = relationship(back_populates="outfit_colors")
+    color: Mapped["Color"] = relationship(back_populates="color_outfits", lazy="selectin")
+    outfit: Mapped["Outfit"] = relationship(back_populates="colors")

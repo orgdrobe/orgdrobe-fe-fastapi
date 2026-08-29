@@ -5,23 +5,13 @@ from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.interfaces import OutfitRepositoryInterface
-from models import Outfit, OutfitGarment, OutfitColor, Garment, GarmentColor
+from models import Outfit, OutfitColor
 
 
 def _outfit_eager_options():
     return [
-        selectinload(Outfit.outfit_garments)
-        .joinedload(OutfitGarment.garment)
-        .options(
-            selectinload(Garment.gender),
-            selectinload(Garment.category_master),
-            selectinload(Garment.category_sub),
-            selectinload(Garment.garment_type),
-            selectinload(Garment.season),
-            selectinload(Garment.usage),
-            selectinload(Garment.garment_colors).joinedload(GarmentColor.color),
-        ),
-        selectinload(Outfit.outfit_colors).joinedload(OutfitColor.color),
+        selectinload(Outfit.garments),
+        selectinload(Outfit.colors).joinedload(OutfitColor.color),
     ]
 
 
@@ -32,7 +22,6 @@ class OutfitRepository(OutfitRepositoryInterface):
     async def add(self, outfit: Outfit) -> Outfit:
         self._session.add(outfit)
         await self._session.flush()
-        await self._session.refresh(outfit)
         return outfit
 
     async def get_by_id(self, id: int) -> Outfit | None:
@@ -61,7 +50,6 @@ class OutfitRepository(OutfitRepositoryInterface):
 
         self._session.add(outfit)
         await self._session.flush()
-        await self._session.refresh(outfit)
         return outfit
 
     async def delete(self, id: int) -> bool:
@@ -74,6 +62,3 @@ class OutfitRepository(OutfitRepositoryInterface):
         await self._session.delete(outfit)
         await self._session.flush()
         return True
-
-    async def expunge(self, outfit: Outfit) -> None:
-        self._session.expunge(outfit)

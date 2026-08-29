@@ -2,7 +2,6 @@ import structlog
 
 from core.exceptions.outfit_exceptions import OutfitNotFound
 from core.exceptions.garment_exceptions import GarmentNotFound
-from core.exceptions.auth_exceptions import InsufficientRole
 from schemas.outfit import NewOutfit, UpdateOutfit, OutfitOut, OutfitColorOut
 from schemas.garment import GarmentOut, GarmentColorOut
 from schemas.gender import GenderOut
@@ -14,12 +13,10 @@ from schemas.usage import UsageOut
 from services.interfaces import UnitOfWorkInterface, OutfitServiceInterface
 from repositories.interfaces import (
     OutfitRepositoryInterface,
-    OutfitGarmentRepositoryInterface,
-    OutfitColorRepositoryInterface,
     ColorRepositoryInterface,
     GarmentRepositoryInterface
 )
-from models import Outfit, OutfitGarment, OutfitColor, Color, Garment
+from models import Outfit, OutfitColor, Color, Garment
 
 logger = structlog.get_logger()
 
@@ -34,11 +31,10 @@ class OutfitService(OutfitServiceInterface):
         async with self._uow as uow:
             garment_repository = uow.get_repo_by_interface(GarmentRepositoryInterface)
             outfit_repository = uow.get_repo_by_interface(OutfitRepositoryInterface)
-            outfit_garment_repository = uow.get_repo_by_interface(OutfitGarmentRepositoryInterface)
-            outfit_color_repository = uow.get_repo_by_interface(OutfitColorRepositoryInterface)
             color_repository = uow.get_repo_by_interface(ColorRepositoryInterface)
 
             unique_garment_ids = list(dict.fromkeys(new_outfit.garment_ids)) if new_outfit.garment_ids else []
+            garments: list[Garment] = []
             if unique_garment_ids:
                 existing_garments = await garment_repository.get_by_ids_and_user_id(
                     ids=unique_garment_ids,
@@ -55,20 +51,9 @@ class OutfitService(OutfitServiceInterface):
                     )
                     raise GarmentNotFound(missing_ids if len(missing_ids) > 1 else missing_ids[0])
 
-            outfit = Outfit(
-                name=new_outfit.name,
-                description=new_outfit.description,
-                user_id=user_id
-            )
-            outfit = await outfit_repository.add(outfit)
+                garments = existing_garments
 
-            for garment_id in unique_garment_ids:
-                outfit_garment = OutfitGarment(
-                    outfit_id=outfit.id,
-                    garment_id=garment_id
-                )
-                await outfit_garment_repository.add(outfit_garment)
-
+            outfit_colors: list[OutfitColor] = []
             if new_outfit.colors:
                 for color_item in new_outfit.colors:
                     color = await color_repository.get_by_rgb(color_item.red, color_item.green, color_item.blue)
@@ -77,18 +62,22 @@ class OutfitService(OutfitServiceInterface):
                         color = await color_repository.add(color)
 
                     outfit_color = OutfitColor(
-                        outfit_id=outfit.id,
-                        color_id=color.id,
+                        color=color,
                         is_primary=color_item.is_primary
                     )
-                    await outfit_color_repository.add(outfit_color)
+                    outfit_colors.append(outfit_color)
 
+            outfit = Outfit(
+                name=new_outfit.name,
+                description=new_outfit.description,
+                user_id=user_id,
+                garments=garments,
+                colors=outfit_colors,
+            )
+            outfit = await outfit_repository.add(outfit)
             await uow.commit()
 
-            created_outfit = await outfit_repository.get_by_id(outfit.id)
-            if not created_outfit:
-                raise OutfitNotFound(outfit.id)
-            result = self._map_outfit_to_out(created_outfit)
+            result = self._map_outfit_to_out(outfit)
             logger.info("outfit_created_successfully", outfit_id=result.id)
 
         return result
@@ -120,8 +109,6 @@ class OutfitService(OutfitServiceInterface):
         async with self._uow as uow:
             outfit_repository = uow.get_repo_by_interface(OutfitRepositoryInterface)
             garment_repository = uow.get_repo_by_interface(GarmentRepositoryInterface)
-            outfit_garment_repository = uow.get_repo_by_interface(OutfitGarmentRepositoryInterface)
-            outfit_color_repository = uow.get_repo_by_interface(OutfitColorRepositoryInterface)
             color_repository = uow.get_repo_by_interface(ColorRepositoryInterface)
 
             outfit = await outfit_repository.get_by_id(id)
@@ -151,16 +138,12 @@ class OutfitService(OutfitServiceInterface):
                         )
                         raise GarmentNotFound(missing_ids if len(missing_ids) > 1 else missing_ids[0])
 
-                await outfit_garment_repository.delete_by_outfit_id(outfit.id)
-                for garment_id in unique_garment_ids:
-                    outfit_garment = OutfitGarment(
-                        outfit_id=outfit.id,
-                        garment_id=garment_id
-                    )
-                    await outfit_garment_repository.add(outfit_garment)
+                    outfit.garments = existing_garments
+                else:
+                    outfit.garments = []
 
             if update_data.colors is not None:
-                await outfit_color_repository.delete_by_outfit_id(outfit.id)
+                new_outfit_colors: list[OutfitColor] = []
                 for color_item in update_data.colors:
                     color = await color_repository.get_by_rgb(color_item.red, color_item.green, color_item.blue)
                     if not color:
@@ -168,20 +151,16 @@ class OutfitService(OutfitServiceInterface):
                         color = await color_repository.add(color)
 
                     outfit_color = OutfitColor(
-                        outfit_id=outfit.id,
-                        color_id=color.id,
+                        color=color,
                         is_primary=color_item.is_primary
                     )
-                    await outfit_color_repository.add(outfit_color)
+                    new_outfit_colors.append(outfit_color)
+
+                outfit.colors = new_outfit_colors
 
             await uow.commit()
 
-            await outfit_repository.expunge(outfit)
-
-            updated_outfit = await outfit_repository.get_by_id(id)
-            if not updated_outfit:
-                raise OutfitNotFound(id)
-            result = self._map_outfit_to_out(updated_outfit)
+            result = self._map_outfit_to_out(outfit)
             logger.info("outfit_updated_successfully", outfit_id=result.id)
 
         return result
@@ -234,19 +213,19 @@ class OutfitService(OutfitServiceInterface):
 
     def _map_outfit_to_out(self, outfit: Outfit) -> OutfitOut:
         garments_out = [
-            self._map_garment_to_out(og.garment)
-            for og in (outfit.outfit_garments or [])
-            if og.garment is not None
+            self._map_garment_to_out(garment)
+            for garment in (outfit.garments or [])
+            if garment is not None
         ]
         colors_out = [
             OutfitColorOut(
-                id=oc.color.id,
-                red=oc.color.red,
-                green=oc.color.green,
-                blue=oc.color.blue,
+                id=oc.color.id if oc.color else oc.color_id,
+                red=oc.color.red if oc.color else 0,
+                green=oc.color.green if oc.color else 0,
+                blue=oc.color.blue if oc.color else 0,
                 is_primary=oc.is_primary,
             )
-            for oc in (outfit.outfit_colors or [])
+            for oc in (outfit.colors or [])
             if oc.color is not None
         ]
         return OutfitOut(

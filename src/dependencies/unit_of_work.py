@@ -6,13 +6,13 @@ from repositories import (UserRepository, UserIdentityRepository, UserRoleReposi
                           CategorySubRepository, GarmentTypeRepository, GenderRepository,
                           SeasonRepository, UsageRepository, ColorRepository,
                           GarmentRepository, GarmentColorRepository,
-                          OutfitRepository, OutfitGarmentRepository, OutfitColorRepository)
+                          OutfitRepository)
 from repositories.interfaces import (UserIdentityRepositoryInterface, UserRepositoryInterface, RoleRepositoryInterface,
                                      UserRoleRepositoryInterface, RefreshTokenRepositoryInterface, CategoryMasterRepositoryInterface,
                                      CategorySubRepositoryInterface, GarmentTypeRepositoryInterface, GenderRepositoryInterface,
                                      SeasonRepositoryInterface, UsageRepositoryInterface, ColorRepositoryInterface,
                                      GarmentRepositoryInterface, GarmentColorRepositoryInterface,
-                                     OutfitRepositoryInterface, OutfitGarmentRepositoryInterface, OutfitColorRepositoryInterface)
+                                     OutfitRepositoryInterface)
 
 
 def get_unit_of_work() -> UnitOfWorkInterface:
@@ -33,7 +33,5 @@ def get_unit_of_work() -> UnitOfWorkInterface:
     unit_of_work.register_factory_by_interface(GarmentRepositoryInterface, lambda session: GarmentRepository(session))
     unit_of_work.register_factory_by_interface(GarmentColorRepositoryInterface, lambda session: GarmentColorRepository(session))
     unit_of_work.register_factory_by_interface(OutfitRepositoryInterface, lambda session: OutfitRepository(session))
-    unit_of_work.register_factory_by_interface(OutfitGarmentRepositoryInterface, lambda session: OutfitGarmentRepository(session))
-    unit_of_work.register_factory_by_interface(OutfitColorRepositoryInterface, lambda session: OutfitColorRepository(session))
 
     return unit_of_work

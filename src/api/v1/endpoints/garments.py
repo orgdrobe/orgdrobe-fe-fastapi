@@ -50,6 +50,7 @@ async def garment_by_id(
     status_code=status.HTTP_201_CREATED,
     responses={
         404: {"model": ErrorResponse, "description": "Referenced entity not found"},
+        409: {"model": ErrorResponse, "description": "Garment name already exists"},
     }
 )
 async def create_garment(
@@ -66,6 +67,7 @@ async def create_garment(
     status_code=status.HTTP_200_OK,
     responses={
         404: {"model": ErrorResponse, "description": "Garment or referenced entity not found"},
+        409: {"model": ErrorResponse, "description": "Garment name already exists"},
     }
 )
 async def update_garment(

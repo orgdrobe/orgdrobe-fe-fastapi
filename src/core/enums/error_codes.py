@@ -56,6 +56,8 @@ class ErrorCode(StrEnum):
 
     # --- Garment ---
     GARMENT_NOT_FOUND = "GARMENT_NOT_FOUND"
+    GARMENT_NAME_TAKEN = "GARMENT_NAME_TAKEN"
 
     # --- Outfit ---
     OUTFIT_NOT_FOUND = "OUTFIT_NOT_FOUND"
+    OUTFIT_NAME_TAKEN = "OUTFIT_NAME_TAKEN"

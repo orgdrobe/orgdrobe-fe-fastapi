@@ -1,7 +1,7 @@
 from typing import Any, Sequence
 
-from sqlalchemy import select, update
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.interfaces import GarmentRepositoryInterface
@@ -15,14 +15,22 @@ class GarmentRepository(GarmentRepositoryInterface):
     async def add(self, garment: Garment) -> Garment: 
         self._session.add(garment)
         await self._session.flush()
-        await self._session.refresh(garment)
         return garment
 
     async def get_by_id(self, id: int) -> Garment | None:
         stmt = (
             select(Garment)
             .where(Garment.id == id)
-            .options(*self._garment_eager_options())
+            .options(*self._eager_options())
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_name(self, name: str) -> Garment | None:
+        stmt = (
+            select(Garment)
+            .where(Garment.name == name)
+            .options(*self._eager_options())
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -33,6 +41,7 @@ class GarmentRepository(GarmentRepositoryInterface):
         stmt = (
             select(Garment)
             .where(Garment.id.in_(ids), Garment.user_id == user_id)
+            .options(*self._eager_options())
         )
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
@@ -41,7 +50,7 @@ class GarmentRepository(GarmentRepositoryInterface):
         stmt = (
             select(Garment)
             .where(Garment.user_id == user_id)
-            .options(*self._garment_eager_options())
+            .options(*self._eager_options())
             .offset(skip)
             .limit(limit)
         )
@@ -54,7 +63,6 @@ class GarmentRepository(GarmentRepositoryInterface):
 
         self._session.add(garment)
         await self._session.flush()
-        await self._session.refresh(garment)
         return garment
         
     async def delete(self, id: int) -> bool:
@@ -69,7 +77,7 @@ class GarmentRepository(GarmentRepositoryInterface):
         return True
 
     @staticmethod
-    def _garment_eager_options():
+    def _eager_options():
         return [
             selectinload(Garment.gender),
             selectinload(Garment.category_master),
@@ -77,5 +85,5 @@ class GarmentRepository(GarmentRepositoryInterface):
             selectinload(Garment.garment_type),
             selectinload(Garment.season),
             selectinload(Garment.usage),
-            selectinload(Garment.garment_colors).joinedload(GarmentColor.color),
+            selectinload(Garment.colors).joinedload(GarmentColor.color),
         ]

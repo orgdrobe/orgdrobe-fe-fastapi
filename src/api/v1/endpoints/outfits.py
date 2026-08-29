@@ -50,6 +50,7 @@ async def outfit_by_id(
     status_code=status.HTTP_201_CREATED,
     responses={
         404: {"model": ErrorResponse, "description": "Garment not found"},
+        409: {"model": ErrorResponse, "description": "Outfit name already exists"},
     }
 )
 async def create_outfit(
@@ -66,6 +67,7 @@ async def create_outfit(
     status_code=status.HTTP_200_OK,
     responses={
         404: {"model": ErrorResponse, "description": "Outfit or Garment not found"},
+        409: {"model": ErrorResponse, "description": "Outfit name already exists"},
     }
 )
 async def update_outfit(

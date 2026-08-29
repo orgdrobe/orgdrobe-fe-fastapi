@@ -1,3 +1,0 @@
-# Deprecated: OutfitGarmentRepositoryInterface is removed.
-
-

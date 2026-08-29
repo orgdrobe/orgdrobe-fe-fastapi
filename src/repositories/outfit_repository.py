@@ -1,18 +1,11 @@
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from repositories.interfaces import OutfitRepositoryInterface
-from models import Outfit, OutfitColor
-
-
-def _outfit_eager_options():
-    return [
-        selectinload(Outfit.garments),
-        selectinload(Outfit.colors).joinedload(OutfitColor.color),
-    ]
+from models import Outfit, OutfitColor, Garment, GarmentColor
 
 
 class OutfitRepository(OutfitRepositoryInterface):
@@ -28,7 +21,16 @@ class OutfitRepository(OutfitRepositoryInterface):
         stmt = (
             select(Outfit)
             .where(Outfit.id == id)
-            .options(*_outfit_eager_options())
+            .options(*self._eager_options())
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_name(self, name: str) -> Outfit | None:
+        stmt = (
+            select(Outfit)
+            .where(Outfit.name == name)
+            .options(*self._eager_options())
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
@@ -37,7 +39,7 @@ class OutfitRepository(OutfitRepositoryInterface):
         stmt = (
             select(Outfit)
             .where(Outfit.user_id == user_id)
-            .options(*_outfit_eager_options())
+            .options(*self._eager_options())
             .offset(skip)
             .limit(limit)
         )
@@ -62,3 +64,18 @@ class OutfitRepository(OutfitRepositoryInterface):
         await self._session.delete(outfit)
         await self._session.flush()
         return True
+
+    @staticmethod
+    def _eager_options():
+        return [
+            selectinload(Outfit.garments).options(
+                selectinload(Garment.gender),
+                selectinload(Garment.category_master),
+                selectinload(Garment.category_sub),
+                selectinload(Garment.garment_type),
+                selectinload(Garment.season),
+                selectinload(Garment.usage),
+                selectinload(Garment.colors).joinedload(GarmentColor.color),
+            ),
+            selectinload(Outfit.colors).joinedload(OutfitColor.color),
+        ]

@@ -1,6 +1,8 @@
+from typing import Any
+
 import structlog
 
-from core.exceptions.outfit_exceptions import OutfitNotFound
+from core.exceptions.outfit_exceptions import OutfitNotFound, OutfitNameAlreadyExists
 from core.exceptions.garment_exceptions import GarmentNotFound
 from schemas.outfit import NewOutfit, UpdateOutfit, OutfitOut, OutfitColorOut
 from schemas.garment import GarmentOut, GarmentColorOut
@@ -25,6 +27,61 @@ class OutfitService(OutfitServiceInterface):
     def __init__(self, uow: UnitOfWorkInterface) -> None:
         self._uow = uow
 
+    async def _resolve_colors(
+        self,
+        color_repo: ColorRepositoryInterface,
+        colors_data: list[Any] | None,
+    ) -> list[OutfitColor]:
+        if not colors_data:
+            return []
+        resolved: list[OutfitColor] = []
+        seen_rgb: set[tuple[int, int, int]] = set()
+        seen_color_ids: set[int] = set()
+        for color_item in colors_data:
+            rgb = (color_item.red, color_item.green, color_item.blue)
+            if rgb in seen_rgb:
+                continue
+            seen_rgb.add(rgb)
+
+            color = await color_repo.get_by_rgb(color_item.red, color_item.green, color_item.blue)
+            if not color:
+                color = Color(red=color_item.red, green=color_item.green, blue=color_item.blue)
+                color = await color_repo.add(color)
+
+            if color.id and color.id in seen_color_ids:
+                continue
+            if color.id:
+                seen_color_ids.add(color.id)
+
+            resolved.append(OutfitColor(color=color, is_primary=color_item.is_primary))
+        return resolved
+
+    async def _resolve_garments(
+        self,
+        garment_repo: GarmentRepositoryInterface,
+        user_id: int,
+        garment_ids: list[int] | None,
+    ) -> list[Garment]:
+        if not garment_ids:
+            return []
+        unique_ids = list(dict.fromkeys(garment_ids))
+        existing_garments = await garment_repo.get_by_ids_and_user_id(
+            ids=unique_ids,
+            user_id=user_id
+        )
+        existing_ids = {g.id for g in existing_garments}
+        missing_ids = [gid for gid in unique_ids if gid not in existing_ids]
+
+        if missing_ids:
+            logger.warning(
+                "outfit_garments_not_found",
+                user_id=user_id,
+                missing_ids=missing_ids
+            )
+            raise GarmentNotFound(missing_ids if len(missing_ids) > 1 else missing_ids[0])
+
+        return list(existing_garments)
+
     async def create(self, user_id: int, new_outfit: NewOutfit) -> OutfitOut:
         logger.info("creating_outfit", user_id=user_id, name=new_outfit.name)
 
@@ -33,46 +90,19 @@ class OutfitService(OutfitServiceInterface):
             outfit_repository = uow.get_repo_by_interface(OutfitRepositoryInterface)
             color_repository = uow.get_repo_by_interface(ColorRepositoryInterface)
 
-            unique_garment_ids = list(dict.fromkeys(new_outfit.garment_ids)) if new_outfit.garment_ids else []
-            garments: list[Garment] = []
-            if unique_garment_ids:
-                existing_garments = await garment_repository.get_by_ids_and_user_id(
-                    ids=unique_garment_ids,
-                    user_id=user_id
-                )
-                existing_ids = {g.id for g in existing_garments}
-                missing_ids = [gid for gid in unique_garment_ids if gid not in existing_ids]
+            if await outfit_repository.get_by_name(new_outfit.name):
+                logger.warning("outfit_create_failed", reason="name_taken", name=new_outfit.name)
+                raise OutfitNameAlreadyExists(new_outfit.name)
 
-                if missing_ids:
-                    logger.warning(
-                        "outfit_create_failed_garments_not_found",
-                        user_id=user_id,
-                        missing_ids=missing_ids
-                    )
-                    raise GarmentNotFound(missing_ids if len(missing_ids) > 1 else missing_ids[0])
-
-                garments = existing_garments
-
-            outfit_colors: list[OutfitColor] = []
-            if new_outfit.colors:
-                for color_item in new_outfit.colors:
-                    color = await color_repository.get_by_rgb(color_item.red, color_item.green, color_item.blue)
-                    if not color:
-                        color = Color(red=color_item.red, green=color_item.green, blue=color_item.blue)
-                        color = await color_repository.add(color)
-
-                    outfit_color = OutfitColor(
-                        color=color,
-                        is_primary=color_item.is_primary
-                    )
-                    outfit_colors.append(outfit_color)
+            garments = await self._resolve_garments(garment_repository, user_id, new_outfit.garment_ids)
+            colors = await self._resolve_colors(color_repository, new_outfit.colors)
 
             outfit = Outfit(
                 name=new_outfit.name,
                 description=new_outfit.description,
                 user_id=user_id,
                 garments=garments,
-                colors=outfit_colors,
+                colors=colors,
             )
             outfit = await outfit_repository.add(outfit)
             await uow.commit()
@@ -116,47 +146,21 @@ class OutfitService(OutfitServiceInterface):
                 logger.warning("outfit_update_failed", reason="not_found", outfit_id=id)
                 raise OutfitNotFound(id)
 
+            if update_data.name is not None and update_data.name != outfit.name:
+                existing_outfit = await outfit_repository.get_by_name(update_data.name)
+                if existing_outfit and existing_outfit.id != id:
+                    logger.warning("outfit_update_failed", reason="name_taken", name=update_data.name)
+                    raise OutfitNameAlreadyExists(update_data.name)
+
             data_dict = update_data.model_dump(exclude_unset=True, exclude={"garment_ids", "colors"})
             if data_dict:
                 await outfit_repository.update(outfit, data_dict)
 
             if update_data.garment_ids is not None:
-                unique_garment_ids = list(dict.fromkeys(update_data.garment_ids))
-                if unique_garment_ids:
-                    existing_garments = await garment_repository.get_by_ids_and_user_id(
-                        ids=unique_garment_ids,
-                        user_id=user_id
-                    )
-                    existing_ids = {g.id for g in existing_garments}
-                    missing_ids = [gid for gid in unique_garment_ids if gid not in existing_ids]
-
-                    if missing_ids:
-                        logger.warning(
-                            "outfit_update_failed_garments_not_found",
-                            user_id=user_id,
-                            missing_ids=missing_ids
-                        )
-                        raise GarmentNotFound(missing_ids if len(missing_ids) > 1 else missing_ids[0])
-
-                    outfit.garments = existing_garments
-                else:
-                    outfit.garments = []
+                outfit.garments = await self._resolve_garments(garment_repository, user_id, update_data.garment_ids)
 
             if update_data.colors is not None:
-                new_outfit_colors: list[OutfitColor] = []
-                for color_item in update_data.colors:
-                    color = await color_repository.get_by_rgb(color_item.red, color_item.green, color_item.blue)
-                    if not color:
-                        color = Color(red=color_item.red, green=color_item.green, blue=color_item.blue)
-                        color = await color_repository.add(color)
-
-                    outfit_color = OutfitColor(
-                        color=color,
-                        is_primary=color_item.is_primary
-                    )
-                    new_outfit_colors.append(outfit_color)
-
-                outfit.colors = new_outfit_colors
+                outfit.colors = await self._resolve_colors(color_repository, update_data.colors)
 
             await uow.commit()
 
@@ -188,13 +192,13 @@ class OutfitService(OutfitServiceInterface):
     def _map_garment_to_out(self, garment: Garment) -> GarmentOut:
         colors_out = [
             GarmentColorOut(
-                id=gc.color.id,
-                red=gc.color.red,
-                green=gc.color.green,
-                blue=gc.color.blue,
+                id=gc.color.id if gc.color else gc.color_id,
+                red=gc.color.red if gc.color else 0,
+                green=gc.color.green if gc.color else 0,
+                blue=gc.color.blue if gc.color else 0,
                 is_primary=gc.is_primary,
             )
-            for gc in (garment.garment_colors or [])
+            for gc in (garment.colors or [])
             if gc.color is not None
         ]
         return GarmentOut(

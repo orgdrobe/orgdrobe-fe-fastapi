@@ -9,6 +9,9 @@ class OutfitRepositoryInterface(ABC):
     async def get_by_id(self, id: int) -> Outfit | None: ...
 
     @abstractmethod
+    async def get_by_name(self, name: str) -> Outfit | None: ...
+
+    @abstractmethod
     async def add(self, outfit: Outfit) -> Outfit: ...
 
     @abstractmethod

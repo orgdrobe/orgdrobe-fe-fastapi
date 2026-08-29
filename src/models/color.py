@@ -17,6 +17,4 @@ class Color(ModelBase):
     blue: Mapped[int] = mapped_column(Integer, nullable=False)
 
     color_garments: Mapped[list["GarmentColor"]] = relationship(back_populates="color", cascade="all, delete-orphan", lazy="selectin")
-    garments: Mapped[list["Garment"]] = relationship(secondary="garment_colors", viewonly=True)
-
     color_outfits: Mapped[list["OutfitColor"]] = relationship(back_populates="color", cascade="all, delete-orphan", lazy="selectin")

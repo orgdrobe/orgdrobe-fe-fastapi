@@ -4,7 +4,6 @@ from .role_repo_interface import RoleRepositoryInterface
 from .user_role_repo_interface import UserRoleRepositoryInterface
 from .refresh_token_repo_interface import RefreshTokenRepositoryInterface
 from .garment_repo_interface import GarmentRepositoryInterface
-from .garment_color_repo_interface import GarmentColorRepositoryInterface
 from .outfit_repo_interface import OutfitRepositoryInterface
 from .category_master_repo_interface import CategoryMasterRepositoryInterface
 from .category_sub_repo_interface import CategorySubRepositoryInterface

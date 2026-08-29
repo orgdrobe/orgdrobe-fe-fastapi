@@ -39,8 +39,7 @@ class Garment(ModelBase):
     usage_id: Mapped[int] = mapped_column(ForeignKey("uses.id", ondelete="RESTRICT"), nullable=False)
     usage: Mapped["Usage"] = relationship(back_populates="garments", lazy="selectin")
 
-    garment_colors: Mapped[list["GarmentColor"]] = relationship(back_populates="garment", cascade="all, delete-orphan", lazy="selectin")
-    colors: Mapped[list["Color"]] = relationship(secondary="garment_colors", viewonly=True)
+    colors: Mapped[list["GarmentColor"]] = relationship(back_populates="garment", cascade="all, delete-orphan", lazy="selectin")
 
     outfits: Mapped[list["Outfit"]] = relationship(
         secondary="outfit_garments",
@@ -61,4 +60,4 @@ class GarmentColor(ModelBase):
     garment_id: Mapped[int] = mapped_column(ForeignKey("garments.id", ondelete="CASCADE"), nullable=False, primary_key=True)
 
     color: Mapped["Color"] = relationship(back_populates="color_garments", lazy="selectin")
-    garment: Mapped["Garment"] = relationship(back_populates="garment_colors")
+    garment: Mapped["Garment"] = relationship(back_populates="colors")

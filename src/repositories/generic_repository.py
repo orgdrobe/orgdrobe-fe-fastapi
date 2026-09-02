@@ -18,7 +18,6 @@ class GenericRepository(GenericRepositoryInterface[T], Generic[T]):
     async def add(self, entity: T) -> T: 
         self._session.add(entity)
         await self._session.flush()
-        await self._session.refresh(entity)
         return entity
     
     async def get_by_id(self, id: int) -> T | None:
@@ -37,7 +36,6 @@ class GenericRepository(GenericRepositoryInterface[T], Generic[T]):
             
         self._session.add(entity) 
         await self._session.flush()
-        await self._session.refresh(entity)
         return entity
     
     async def delete(self, id: int) -> bool:

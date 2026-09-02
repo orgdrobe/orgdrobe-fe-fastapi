@@ -17,7 +17,7 @@ class GarmentColorBase(CamelCaseBaseModel):
 
 class NewGarment(CamelCaseBaseModel):
     name: str
-    description: str
+    description: str | None = None
     gender_id: int
     category_master_id: int
     category_sub_id: int
@@ -49,7 +49,7 @@ class GarmentColorOut(GarmentColorBase):
 class GarmentOut(CamelCaseBaseModel):
     id: int
     name: str
-    description: str | None
+    description: str | None = None
     user_id: int
     
     gender: GenderOut

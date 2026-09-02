@@ -19,7 +19,7 @@ class OutfitColorOut(OutfitColor):
 
 class NewOutfit(CamelCaseBaseModel):
     name: str
-    description: str
+    description: str | None = None
     garment_ids: list[int]
     colors: list[OutfitColor]
 
@@ -34,7 +34,7 @@ class UpdateOutfit(CamelCaseBaseModel):
 class OutfitOut(CamelCaseBaseModel):
     id: int
     name: str
-    description: str | None
+    description: str | None = None
     user_id: int
 
     garments: list[GarmentOut]

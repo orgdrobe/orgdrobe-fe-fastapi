@@ -5,7 +5,7 @@ from schemas.base_model import CamelCaseBaseModel
 
 class NewGarmentType(CamelCaseBaseModel):
     name: str
-    description: str
+    description: str | None = None
 
 
 class UpdateGarmentType(CamelCaseBaseModel):
@@ -16,7 +16,7 @@ class UpdateGarmentType(CamelCaseBaseModel):
 class GarmentTypeOut(CamelCaseBaseModel):
     id: int
     name: str
-    description: str
+    description: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
